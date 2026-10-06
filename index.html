@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xtube Premium - Like & Share Feature</title>
+    <title>Xtube Premium - Masterpiece Edition</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: #fff; min-height: 100vh; padding-top: 130px; overflow-x: hidden; transition: background 0.3s; }
@@ -163,13 +163,14 @@
     </div>
 
     <div id="toast">Message</div>
-    <a href="https://t.me/your_telegram" target="_blank" class="floating-tg">✈️️<div class="floating-badge">Join</div></a>
+    <a href="https://t.me/your_telegram" target="_blank" class="floating-tg">✈️<div class="floating-badge">Join</div></a>
 
     <script>
+        // Official Eporner working thumbnail structure using direct CDN fallback
         let defaultVideos = [
-            { id: "v1", title: "Exclusive Masterpiece HD #1", embedId: "x3i1DfgDSI7", thumb: "https://t2.hstccdn.com/contents/videos/thumbs/x3i1DfgDSI7/3_360.jpg", likes: 142 },
-            { id: "v2", title: "Trending Hot Scene #2", embedId: "cJlRmiI4IOH", thumb: "https://t2.hstccdn.com/contents/videos/thumbs/cJlRmiI4IOH/3_360.jpg", likes: 230 },
-            { id: "v3", title: "Amateur Special Collection #3", embedId: "xfmAGXMHLQt", thumb: "https://t2.hstccdn.com/contents/videos/thumbs/xfmAGXMHLQt/3_360.jpg", likes: 98 }
+            { id: "v1", title: "Exclusive Masterpiece HD #1", embedId: "x3i1DfgDSI7", thumb: "https://static-s.eporner.com/thumbs/static4/x3i/x3i1DfgDSI7/3_360.jpg", likes: 142 },
+            { id: "v2", title: "Trending Hot Scene #2", embedId: "cJlRmiI4IOH", thumb: "https://static-s.eporner.com/thumbs/static4/cJl/cJlRmiI4IOH/3_360.jpg", likes: 230 },
+            { id: "v3", title: "Amateur Special Collection #3", embedId: "xfmAGXMHLQt", thumb: "https://static-s.eporner.com/thumbs/static4/xfm/xfmAGXMHLQt/3_360.jpg", likes: 98 }
         ];
 
         let universalVideos = JSON.parse(localStorage.getItem('xtube_custom_videos')) || defaultVideos;
@@ -202,11 +203,14 @@
                 title = "Exclusive Premium Video #" + (universalVideos.length + 1);
             }
 
+            const prefix1 = embedId.substring(0, 1);
+            const prefix3 = embedId.substring(0, 3);
+
             const newVid = {
                 id: "vid_" + Date.now(),
                 title: title,
                 embedId: embedId,
-                thumb: `https://t2.hstccdn.com/contents/videos/thumbs/${embedId}/3_360.jpg`,
+                thumb: `https://static-s.eporner.com/thumbs/static4/${prefix1}/${prefix3}/${embedId}/3_360.jpg`,
                 likes: Math.floor(Math.random() * 150) + 20
             };
 
@@ -215,7 +219,7 @@
 
             document.getElementById('videoTitleInput').value = '';
             document.getElementById('embedLinkInput').value = '';
-            showToast("Video added successfully!");
+            showToast("Video added with thumbnail successfully!");
             renderGrid(universalVideos);
         }
 
@@ -233,11 +237,15 @@
             videos.forEach(vid => {
                 const embedUrl = `https://www.eporner.com/embed/${vid.embedId}/`;
                 const prog = progressData[vid.id] ? `<div class="progress-bg"><div class="progress-fill" style="width: ${progressData[vid.id]}%;"></div></div>` : '';
+                
+                // Fallback mechanism if primary static URL fails
+                const fallbackThumb = `https://t2.hstccdn.com/contents/videos/thumbs/${vid.embedId}/3_360.jpg`;
+
                 grid.innerHTML += `
                     <div class="card">
                         <button class="delete-btn" onclick="deleteVideo('${vid.id}')">Delete</button>
                         <div class="video-container" onclick="openTheater('${vid.id}', '${embedUrl}', '${vid.title}')">
-                            <img src="${vid.thumb}" loading="lazy" alt="thumb" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=640&auto=format&fit=crop&q=80'">
+                            <img src="${vid.thumb}" loading="lazy" alt="thumb" onerror="this.onerror=null; this.src='${fallbackThumb}';">
                             <div class="play-overlay">▶</div>
                             ${prog}
                         </div>
@@ -253,7 +261,6 @@
             document.getElementById('theater-title').textContent = title;
             document.getElementById('theater-container').innerHTML = `<iframe id="main-video-frame" src="${url}" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="autoplay; fullscreen"></iframe>`;
             
-            // Set current video likes
             const currentVid = universalVideos.find(v => v.id === id);
             if(currentVid) {
                 document.getElementById('likeCount').textContent = currentVid.likes || 50;
