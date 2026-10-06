@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xtube - Flixrel</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: #fff; min-height: 100vh; padding: 20px; }
+        
+        header { text-align: center; margin-bottom: 30px; }
+        header h1 { font-size: 28px; color: #ff3366; letter-spacing: 1px; text-shadow: 0 2px 10px rgba(255,51,102,0.4); }
+        header p { font-size: 13px; color: #aaa; margin-top: 5px; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
+        
+        /* Glassmorphism Card Style */
+        .card { 
+            background: rgba(255, 255, 255, 0.05); 
+            backdrop-filter: blur(12px); 
+            -webkit-backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            border-radius: 12px; 
+            overflow: hidden; 
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            transition: transform 0.3s ease;
+        }
+        .card:hover { transform: translateY(-5px); }
+
+        .video-container { position: relative; width: 100%; padding-bottom: 56.25%; background: #000; }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+
+        .info { padding: 15px; }
+        .title { font-size: 15px; font-weight: 600; margin-bottom: 12px; color: #fff; line-height: 1.4; height: 42px; overflow: hidden; }
+
+        .actions { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px; }
+        
+        .btn-group { display: flex; gap: 8px; }
+        button { 
+            background: rgba(255, 255, 255, 0.1); 
+            color: #fff; 
+            border: 1px solid rgba(255,255,255,0.15); 
+            padding: 6px 12px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 12px; 
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: 0.2s; 
+        }
+        button:hover { background: #ff3366; border-color: #ff3366; }
+
+        /* Comments Section Styling */
+        .comment-section { margin-top: 12px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 10px; }
+        .comment-input-box { display: flex; gap: 5px; margin-bottom: 8px; }
+        .comment-input-box input { 
+            flex: 1; 
+            background: rgba(0,0,0,0.3); 
+            border: 1px solid rgba(255,255,255,0.1); 
+            padding: 6px 10px; 
+            border-radius: 4px; 
+            color: #fff; 
+            font-size: 12px; 
+        }
+        .comment-input-box button { background: #ff3366; border: none; }
+        
+        .comments-list { max-height: 80px; overflow-y: auto; font-size: 11px; color: #ccc; display: flex; flex-direction: column; gap: 4px; }
+        .comment-item { background: rgba(0,0,0,0.2); padding: 4px 8px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Xtube Flixrel</h1>
+        <p>Exclusive Premium Video Stream</p>
+    </header>
+
+    <div class="grid" id="video-grid">
+        <!-- Dynamic Cards -->
+    </div>
+
+    <script>
+        // স্যাম্পল ভিডিও ডেটা (এখানে আপনি API বা নতুন এম্বেড লিংক যুক্ত করতে পারবেন)
+        const videos = [
+            {
+                title: "Exotic HD Clip Showcase #1",
+                embedUrl: "https://www.eporner.com/embed/123456/",
+                likes: 142,
+                comments: ["Amazing quality!", "Love this video!"]
+            },
+            {
+                title: "Trending Popular Scene HD #2",
+                embedUrl: "https://www.eporner.com/embed/789012/",
+                likes: 98,
+                comments: ["Superb collection!"]
+            }
+        ];
+
+        const grid = document.getElementById('video-grid');
+
+        videos.forEach((vid, index) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            
+            const shareUrl = window.location.href.split('#')[0] + '#video-' + index;
+
+            card.innerHTML = `
+                <div class="video-container">
+                    <iframe src="${vid.embedUrl}" allowfullscreen></iframe>
+                </div>
+                <div class="info">
+                    <div class="title">${vid.title}</div>
+                    <div class="actions">
+                        <div class="btn-group">
+                            <button onclick="likeVideo(${index}, this)">❤️ <span id="like-count-${index}">${vid.likes}</span></button>
+                            <button onclick="shareVideo('${shareUrl}', '${vid.title}')">🔗 Share</button>
+                        </div>
+                    </div>
+                    <div class="comment-section">
+                        <div class="comment-input-box">
+                            <input type="text" id="comment-input-${index}" placeholder="Add a comment...">
+                            <button onclick="addComment(${index})">Post</button>
+                        </div>
+                        <div class="comments-list" id="comment-list-${index}">
+                            ${vid.comments.map(c => `<div class="comment-item">${c}</div>`).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+
+        function likeVideo(index, btn) {
+            const countSpan = document.getElementById(`like-count-${index}`);
+            let currentLikes = parseInt(countSpan.textContent);
+            countSpan.textContent = currentLikes + 1;
+            btn.style.color = '#ff3366';
+            btn.disabled = true;
+        }
+
+        function shareVideo(url, title) {
+            if (navigator.share) {
+                navigator.share({ title: title, url: url }).catch(console.error);
+            } else {
+                navigator.clipboard.writeText(url);
+                alert('Video link copied to clipboard!');
+            }
+        }
+
+        function addComment(index) {
+            const input = document.getElementById(`comment-input-${index}`);
+            const list = document.getElementById(`comment-list-${index}`);
+            if (input.value.trim() !== "") {
+                const newComment = document.createElement('div');
+                newComment.className = 'comment-item';
+                newComment.textContent = input.value;
+                list.appendChild(newComment);
+                input.value = "";
+                list.scrollTop = list.scrollHeight;
+            }
+        }
+    </script>
+</body>
+</html>
