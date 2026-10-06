@@ -33,9 +33,9 @@
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto 40px; padding: 0 20px; }
         .card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; overflow: hidden; box-shadow: 0 8px 32px 0 rgba(0,0,0,0.3); transition: 0.3s ease; }
         .card:hover { transform: translateY(-5px); border-color: rgba(255,51,102,0.3); }
-        .video-container { position: relative; width: 100%; padding-bottom: 56.25%; background: #000; cursor: pointer; }
+        .video-container { position: relative; width: 100%; padding-bottom: 56.25%; background: #111; cursor: pointer; }
         .video-container img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
-        .play-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 40px; color: rgba(255,255,255,0.7); pointer-events: none; }
+        .play-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 40px; color: rgba(255,255,255,0.8); background: rgba(0,0,0,0.4); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; pointer-events: none; }
         
         .progress-bg { position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: rgba(255,255,255,0.2); }
         .progress-fill { height: 100%; background: #ff3366; width: 0%; box-shadow: 0 0 5px #ff3366; }
@@ -168,12 +168,14 @@
     <a href="https://t.me/your_telegram" target="_blank" class="floating-tg">✈️<div class="floating-badge">Join</div></a>
 
     <script>
-        // ব্যাকআপ রিয়েল ভিডিও ডাটাবেজ (CORS বা এপিআই ব্লক এড়ানোর জন্য ইনস্ট্যান্ট সেফ সলিউশন)
+        // পর্যাপ্ত রিয়েল থাম্বনেইল লিংকসহ ভিডিও ডাটাবেজ
         let sampleVideos = [
-            { id: "v1", title: "Exotic HD Clip Showcase #1", embedUrl: "https://www.eporner.com/embed/123456/", thumb: "https://via.placeholder.com/640x360/1a1a1a/ff3366?text=HD+Video+1" },
-            { id: "v2", title: "Trending Popular Scene HD #2", embedUrl: "https://www.eporner.com/embed/789012/", thumb: "https://via.placeholder.com/640x360/1a1a1a/ff3366?text=HD+Video+2" },
-            { id: "v3", title: "Amateur Asian Collection Vibe", embedUrl: "https://www.eporner.com/embed/345678/", thumb: "https://via.placeholder.com/640x360/1a1a1a/ff3366?text=HD+Video+3" },
-            { id: "v4", title: "Premium Exclusive Studio Cut", embedUrl: "https://www.eporner.com/embed/901234/", thumb: "https://via.placeholder.com/640x360/1a1a1a/ff3366?text=HD+Video+4" }
+            { id: "v1", title: "Exotic HD Clip Showcase #1", embedUrl: "https://www.eporner.com/embed/123456/", thumb: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=640&auto=format&fit=crop&q=80" },
+            { id: "v2", title: "Trending Popular Scene HD #2", embedUrl: "https://www.eporner.com/embed/789012/", thumb: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=640&auto=format&fit=crop&q=80" },
+            { id: "v3", title: "Amateur Asian Collection Vibe", embedUrl: "https://www.eporner.com/embed/345678/", thumb: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=640&auto=format&fit=crop&q=80" },
+            { id: "v4", title: "Premium Exclusive Studio Cut", embedUrl: "https://www.eporner.com/embed/901234/", thumb: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=640&auto=format&fit=crop&q=80" },
+            { id: "v5", title: "Ultimate Cinematic Masterpiece", embedUrl: "https://www.eporner.com/embed/567890/", thumb: "https://images.unsplash.com/photo-1558470598-a5dda9640f68?w=640&auto=format&fit=crop&q=80" },
+            { id: "v6", title: "Exclusive Private Collection Vibe", embedUrl: "https://www.eporner.com/embed/234567/", thumb: "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=640&auto=format&fit=crop&q=80" }
         ];
 
         let currentPlayingId = null;
@@ -319,11 +321,11 @@
             const feed = document.getElementById('shorts-feed');
             feed.innerHTML = '';
             sampleVideos.forEach(vid => {
-                feed.innerHTML = `
+                feed.innerHTML += `
                     <div class="short-item">
                         <iframe src="${vid.embedUrl}" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" loading="lazy"></iframe>
                     </div>
-                ` + feed.innerHTML;
+                `;
             });
             document.getElementById('shortsMode').style.display = 'flex';
         }
@@ -340,7 +342,6 @@
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
         }
 
-        // রেন্ডার ইনিশিয়েট
         renderMain();
     </script>
 </body>
