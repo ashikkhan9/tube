@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xtube Premium - Admin Panel Masterpiece</title>
+    <title>Xtube Premium - Like & Share Feature</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: #fff; min-height: 100vh; padding-top: 130px; overflow-x: hidden; transition: background 0.3s; }
@@ -31,7 +31,6 @@
         .cat-tag.active, .cat-tag:hover { background: #ff3366; border-color: #ff3366; }
         .shorts-btn { background: linear-gradient(45deg, #ff0050, #00f2fe); border: none; font-weight: bold; }
 
-        /* Admin Panel Drawer */
         .admin-panel { max-width: 1200px; margin: 0 auto 20px; padding: 20px; background: rgba(255,255,255,0.05); backdrop-filter: blur(12px); border: 1px solid rgba(255,51,102,0.3); border-radius: 12px; display: none; flex-direction: column; gap: 15px; }
         .admin-panel.show { display: flex; }
         .admin-panel h3 { color: #ff3366; font-size: 18px; }
@@ -72,7 +71,9 @@
         .action-buttons { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         .btn-action { background: #25D366; color: #000; border: none; padding: 10px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; text-decoration: none; transition: 0.2s; display: flex; align-items: center; gap: 5px; }
         .btn-action:hover { transform: scale(1.05); }
-        .btn-next { background: #ff3366; color: #fff; }
+        .btn-like { background: #ff3366; color: #fff; }
+        .btn-share { background: #0088cc; color: #fff; }
+        .btn-next { background: #333; color: #fff; border: 1px solid #555; }
         .btn-fullscreen { background: #fff; color: #000; }
         
         #shortsMode { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 4000; display: none; flex-direction: column; }
@@ -123,7 +124,6 @@
         </div>
     </div>
 
-    <!-- Admin Panel Section -->
     <div style="padding-top: 130px;" id="adminPanelWrapper"></div>
     <div class="admin-panel" id="adminPanel">
         <h3>🛠️ Video Upload & Management Panel</h3>
@@ -147,8 +147,10 @@
             <div class="action-bar">
                 <div class="blinking-live">🔴 <span id="liveViewers">420</span> people watching now</div>
                 <div class="action-buttons">
+                    <button class="btn-action btn-like" onclick="likeVideo()">❤️ Like (<span id="likeCount">124</span>)</button>
+                    <button class="btn-action btn-share" onclick="shareVideo()">🔗 Share</button>
                     <button class="btn-action btn-fullscreen" onclick="goFullscreen()">🔲 Full Screen</button>
-                    <a href="https://your-adsterra-direct-link.com" target="_blank" class="btn-action">⬇ HD</a>
+                    <a href="https://your-adsterra-direct-link.com" target="_blank" class="btn-action" style="background:#25D366; color:#000;">⬇ HD</a>
                     <button class="btn-action btn-next" onclick="playNextVideo()">⏭ Next</button>
                 </div>
             </div>
@@ -161,14 +163,13 @@
     </div>
 
     <div id="toast">Message</div>
-    <a href="https://t.me/your_telegram" target="_blank" class="floating-tg">✈️<div class="floating-badge">Join</div></a>
+    <a href="https://t.me/your_telegram" target="_blank" class="floating-tg">✈️️<div class="floating-badge">Join</div></a>
 
     <script>
-        // Default video pool stored in localStorage
         let defaultVideos = [
-            { id: "v1", title: "Exclusive Masterpiece HD #1", embedId: "x3i1DfgDSI7", thumb: "https://static-s.eporner.com/thumbs/static4/x3i/x3i1DfgDSI7/3_360.jpg" },
-            { id: "v2", title: "Trending Hot Scene #2", embedId: "cJlRmiI4IOH", thumb: "https://static-s.eporner.com/thumbs/static4/cJl/cJlRmiI4IOH/3_360.jpg" },
-            { id: "v3", title: "Amateur Special Collection #3", embedId: "xfmAGXMHLQt", thumb: "https://static-s.eporner.com/thumbs/static4/xfm/xfmAGXMHLQt/3_360.jpg" }
+            { id: "v1", title: "Exclusive Masterpiece HD #1", embedId: "x3i1DfgDSI7", thumb: "https://t2.hstccdn.com/contents/videos/thumbs/x3i1DfgDSI7/3_360.jpg", likes: 142 },
+            { id: "v2", title: "Trending Hot Scene #2", embedId: "cJlRmiI4IOH", thumb: "https://t2.hstccdn.com/contents/videos/thumbs/cJlRmiI4IOH/3_360.jpg", likes: 230 },
+            { id: "v3", title: "Amateur Special Collection #3", embedId: "xfmAGXMHLQt", thumb: "https://t2.hstccdn.com/contents/videos/thumbs/xfmAGXMHLQt/3_360.jpg", likes: 98 }
         ];
 
         let universalVideos = JSON.parse(localStorage.getItem('xtube_custom_videos')) || defaultVideos;
@@ -189,7 +190,6 @@
                 return;
             }
 
-            // Extract ID if full iframe code or URL is pasted
             let embedId = rawInput;
             if (rawInput.includes('eporner.com/embed/')) {
                 const parts = rawInput.split('embed/');
@@ -206,7 +206,8 @@
                 id: "vid_" + Date.now(),
                 title: title,
                 embedId: embedId,
-                thumb: `https://static-s.eporner.com/thumbs/static4/${embedId.substring(0,3)}/${embedId}/3_360.jpg`
+                thumb: `https://t2.hstccdn.com/contents/videos/thumbs/${embedId}/3_360.jpg`,
+                likes: Math.floor(Math.random() * 150) + 20
             };
 
             universalVideos.unshift(newVid);
@@ -251,7 +252,34 @@
             currentPlayingId = id;
             document.getElementById('theater-title').textContent = title;
             document.getElementById('theater-container').innerHTML = `<iframe id="main-video-frame" src="${url}" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="autoplay; fullscreen"></iframe>`;
+            
+            // Set current video likes
+            const currentVid = universalVideos.find(v => v.id === id);
+            if(currentVid) {
+                document.getElementById('likeCount').textContent = currentVid.likes || 50;
+            }
+
             document.getElementById('theaterMode').style.display = 'flex';
+        }
+
+        function likeVideo() {
+            if(!currentPlayingId) return;
+            const vid = universalVideos.find(v => v.id === currentPlayingId);
+            if(vid) {
+                vid.likes = (vid.likes || 50) + 1;
+                document.getElementById('likeCount').textContent = vid.likes;
+                localStorage.setItem('xtube_custom_videos', JSON.stringify(universalVideos));
+                showToast("❤️ Liked successfully!");
+            }
+        }
+
+        function shareVideo() {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(window.location.href);
+                showToast("🔗 Video link copied to clipboard!");
+            } else {
+                showToast("🔗 Share link ready!");
+            }
         }
 
         function closeTheater() {
