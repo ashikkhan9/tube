@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xtube Premium - Real Streams</title>
+    <title>Xtube Premium - Live API Stream</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: #fff; min-height: 100vh; padding-top: 130px; overflow-x: hidden; transition: background 0.3s; }
@@ -110,22 +110,22 @@
     <nav>
         <a href="#" class="logo">Xtube</a>
         <div class="nav-right">
-            <input type="text" class="search-bar" id="searchInput" placeholder="Search videos..." onkeyup="filterVideos()">
+            <input type="text" class="search-bar" id="searchInput" placeholder="Search live API..." onkeyup="searchApiVideos()">
             <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
         </div>
     </nav>
     <div class="sub-nav">
         <div class="categories">
-            <div class="cat-tag active" onclick="filterCategory('All')">All</div>
+            <div class="cat-tag active" onclick="fetchApiVideos('hot')">All</div>
             <div class="cat-tag shorts-btn" onclick="openShortsMode()">📱 Shorts</div>
-            <div class="cat-tag" onclick="filterCategory('Trending')">Trending</div>
-            <div class="cat-tag" onclick="filterCategory('HD')">HD</div>
-            <div class="cat-tag" onclick="filterCategory('Amateur')">Amateur</div>
+            <div class="cat-tag" onclick="fetchApiVideos('trending')">Trending</div>
+            <div class="cat-tag" onclick="fetchApiVideos('hd')">HD</div>
+            <div class="cat-tag" onclick="fetchApiVideos('amateur')">Amateur</div>
         </div>
     </div>
 
     <div class="grid" id="video-grid"></div>
-    <div id="loader-spinner">Loading more high-speed streams...</div>
+    <div id="loader-spinner">Fetching live videos from API...</div>
 
     <div id="theaterMode" onscroll="handlePiPScroll()">
         <div class="theater-header">
@@ -171,46 +171,59 @@
     <a href="https://t.me/your_telegram" target="_blank" class="floating-tg">✈️<div class="floating-badge">Join</div></a>
 
     <script>
-        // Real working Eporner embed streams with high-resolution direct thumbnails
-        let masterVideoPool = [
-            { id: "r1", title: "Exclusive HD Sensual Masterpiece #1", embedUrl: "https://www.eporner.com/embed/5829103/", thumb: "https://static-s.eporner.com/thumbs/static4/5/58/582/5829103/3_360.jpg", category: "HD" },
-            { id: "r2", title: "Trending Viral Hot Scene #2", embedUrl: "https://www.eporner.com/embed/5819021/", thumb: "https://static-s.eporner.com/thumbs/static4/5/58/581/5819021/3_360.jpg", category: "Trending" },
-            { id: "r3", title: "Amateur Asian Vibe Special #3", embedUrl: "https://www.eporner.com/embed/5792144/", thumb: "https://static-s.eporner.com/thumbs/static4/5/57/579/5792144/3_360.jpg", category: "Amateur" },
-            { id: "r4", title: "Premium Studio Cut Raw #4", embedUrl: "https://www.eporner.com/embed/5801298/", thumb: "https://static-s.eporner.com/thumbs/static4/5/58/580/5801298/3_360.jpg", category: "HD" },
-            { id: "r5", title: "Ultimate Cinematic Experience #5", embedUrl: "https://www.eporner.com/embed/5784102/", thumb: "https://static-s.eporner.com/thumbs/static4/5/57/578/5784102/3_360.jpg", category: "Trending" },
-            { id: "r6", title: "Private Collection VIP Cut #6", embedUrl: "https://www.eporner.com/embed/5831092/", thumb: "https://static-s.eporner.com/thumbs/static4/5/58/583/5831092/3_360.jpg", category: "Amateur" },
-            { id: "r7", title: "High Speed Luxury Showcase #7", embedUrl: "https://www.eporner.com/embed/5769201/", thumb: "https://static-s.eporner.com/thumbs/static4/5/57/576/5769201/3_360.jpg", category: "HD" },
-            { id: "r8", title: "Exotic Night Vibe Stream #8", embedUrl: "https://www.eporner.com/embed/5810349/", thumb: "https://static-s.eporner.com/thumbs/static4/5/58/581/5810349/3_360.jpg", category: "Trending" }
-        ];
-
-        let allVideos = [];
+        let liveApiVideos = [];
         let currentPlayingId = null;
         let progressData = JSON.parse(localStorage.getItem('xtube_progress')) || {};
+        let currentPage = 1;
         let isFetching = false;
+        let currentQuery = 'hot';
 
-        function initializeVideos() {
-            allVideos = [...masterVideoPool];
-            renderGrid(allVideos);
+        // 🚀 Real Dynamic API Fetcher with CORS Proxy (Like FlixrelMovie)
+        async function fetchApiVideos(query = 'hot', page = 1, append = false) {
+            if (isFetching) return;
+            isFetching = true;
+            currentQuery = query;
+            currentPage = page;
+            document.getElementById('loader-spinner').style.display = 'block';
+
+            // Using proxy to bypass browser CORS block so live API data loads automatically
+            const apiUrl = `https://api.allorigins.win/raw?url=` + encodeURIComponent(`https://www.eporner.com/api/v2/video/search/?query=${query}&per_page=20&page=${page}&format=json`);
+
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+
+                if (data && data.videos && data.videos.length > 0) {
+                    const formatted = data.videos.map((vid, idx) => ({
+                        id: "api_" + page + "_" + idx + "_" + Math.random().toString(36).substring(2, 7),
+                        title: vid.title,
+                        embedUrl: vid.embed,
+                        thumb: vid.default_thumb.src || "https://static-s.eporner.com/thumbs/static4/5/58/582/5829103/3_360.jpg",
+                        duration: vid.length_mb || "HD"
+                    }));
+
+                    if (append) {
+                        liveApiVideos = [...liveApiVideos, ...formatted];
+                    } else {
+                        liveApiVideos = formatted;
+                    }
+                    renderGrid(liveApiVideos);
+                }
+            } catch (err) {
+                console.error("Live API Fetch Error:", err);
+                showToast("API connection error. Retrying...");
+            } finally {
+                isFetching = false;
+                document.getElementById('loader-spinner').style.display = 'none';
+            }
         }
 
+        // ♾️ Infinite Scroll for Live API Data
         window.addEventListener('scroll', () => {
             if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 300) {
                 if (!isFetching) {
-                    isFetching = true;
-                    document.getElementById('loader-spinner').style.display = 'block';
-                    setTimeout(() => {
-                        const generatedBatch = masterVideoPool.map((item, idx) => ({
-                            id: "gen_" + Date.now() + "_" + idx,
-                            title: item.title.replace(/#\d+/, '#' + (idx + 9)),
-                            embedUrl: item.embedUrl,
-                            thumb: item.thumb,
-                            category: item.category
-                        }));
-                        allVideos = [...allVideos, ...generatedBatch];
-                        renderGrid(allVideos);
-                        document.getElementById('loader-spinner').style.display = 'none';
-                        isFetching = false;
-                    }, 600);
+                    currentPage++;
+                    fetchApiVideos(currentQuery, currentPage, true);
                 }
             }
         });
@@ -233,20 +246,12 @@
             });
         }
 
-        function filterVideos() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = allVideos.filter(v => v.title.toLowerCase().includes(query));
-            renderGrid(filtered);
-        }
-
-        function filterCategory(cat) {
-            document.querySelectorAll('.cat-tag').forEach(el => el.classList.remove('active'));
-            event.target.classList.add('active');
-            if (cat === 'All') {
-                renderGrid(allVideos);
-            } else {
-                const filtered = allVideos.filter(v => v.category === cat);
-                renderGrid(filtered.length > 0 ? filtered : allVideos);
+        async function searchApiVideos() {
+            const query = document.getElementById('searchInput').value;
+            if (query.length > 2) {
+                fetchApiVideos(query, 1, false);
+            } else if (query.length === 0) {
+                fetchApiVideos('hot', 1, false);
             }
         }
 
@@ -270,7 +275,7 @@
             document.getElementById('theater-container').innerHTML = '';
             document.getElementById('theater-container').classList.remove('pip-active');
             clearInterval(liveInterval);
-            renderGrid(allVideos);
+            renderGrid(liveApiVideos);
         }
 
         function handlePiPScroll() {
@@ -284,8 +289,8 @@
         }
 
         function playNextVideo() {
-            if (allVideos.length === 0) return;
-            const nextVid = allVideos[Math.floor(Math.random() * allVideos.length)];
+            if (liveApiVideos.length === 0) return;
+            const nextVid = liveApiVideos[Math.floor(Math.random() * liveApiVideos.length)];
             document.getElementById('theater-title').textContent = "Loading Next Stream...";
             document.getElementById('theater-container').innerHTML = `<div style="display:flex; justify-content:center; align-items:center; width:100%; height:100%; background:#000; color:#ff3366; font-weight:bold;">Buffering...</div>`;
             setTimeout(() => { openTheater(nextVid.id, nextVid.embedUrl, nextVid.title); }, 1000);
@@ -303,7 +308,7 @@
         function renderSuggested(currentId) {
             const sGrid = document.getElementById('suggested-grid');
             sGrid.innerHTML = '';
-            const filtered = allVideos.filter(v => v.id !== currentId).slice(0, 4);
+            const filtered = liveApiVideos.filter(v => v.id !== currentId).slice(0, 4);
             filtered.forEach(vid => {
                 sGrid.innerHTML += `
                     <div class="card" onclick="openTheater('${vid.id}', '${vid.embedUrl}', '${vid.title}')">
@@ -321,7 +326,7 @@
             closeTheater();
             const feed = document.getElementById('shorts-feed');
             feed.innerHTML = '';
-            allVideos.forEach(vid => {
+            liveApiVideos.forEach(vid => {
                 feed.innerHTML += `
                     <div class="short-item">
                         <iframe src="${vid.embedUrl}" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="autoplay; fullscreen" loading="lazy"></iframe>
@@ -403,8 +408,9 @@
             document.getElementById('ageModal').style.display = 'none';
         }
 
+        // Initialize Live API Fetching on Page Load
         window.addEventListener('DOMContentLoaded', () => {
-            initializeVideos();
+            fetchApiVideos('hot', 1, false);
         });
     </script>
 </body>
