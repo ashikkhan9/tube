@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xtube Premium</title>
+    <title>Xtube Premium - JSONP Direct API</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: #fff; min-height: 100vh; padding-top: 130px; overflow-x: hidden; transition: background 0.3s; }
@@ -75,7 +75,7 @@
     </div>
 
     <div class="grid" id="video-grid"></div>
-    <div class="loader" id="loader">Loading Videos... 🚀</div>
+    <div class="loader" id="loader">Loading Direct API (Please ON VPN)... 🚀</div>
 
     <div id="theaterMode">
         <div class="theater-header">
@@ -91,7 +91,7 @@
                     <button class="btn-action btn-like" onclick="likeVideo()">❤️ Like</button>
                     <button class="btn-action btn-share" onclick="shareVideo()">🔗 Share</button>
                     <button class="btn-action btn-fullscreen" onclick="goFullscreen()">🔲 Full Screen</button>
-                    <a href="https://your-adsterra-direct-link.com" target="_blank" class="btn-action" style="background:#25D366; color:#000;">⬇ Download HD</a>
+                    <a href="#" class="btn-action" style="background:#25D366; color:#000;">⬇ Download HD</a>
                 </div>
             </div>
         </div>
@@ -112,70 +112,58 @@
             return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
         }
 
-        async function fetchVideosFromAPI(query, page) {
+        // JSONP Callback Function (Proxy lagbe na)
+        window.handleEpornerData = function(data) {
+            if (data && data.videos && data.videos.length > 0) {
+                const fetchedVids = data.videos.map(v => {
+                    let cleanUrl = `https://www.eporner.com/embed/${v.id}/`; 
+                    const safeTitle = v.title ? v.title.replace(/['"]/g, "") : "Video";
+                    const safeThumb = (v.default_thumb && v.default_thumb.src) ? v.default_thumb.src : "";
+                    const videoDuration = formatDuration(v.length_sec);
+
+                    return {
+                        id: v.id,
+                        title: safeTitle,
+                        embedUrl: cleanUrl, 
+                        thumb: safeThumb,
+                        duration: videoDuration
+                    };
+                });
+
+                liveVideos = [...liveVideos, ...fetchedVids];
+                renderGrid(liveVideos);
+            } else {
+                showToast("No videos found. Please check your VPN.");
+            }
+            isFetching = false;
+            document.getElementById('loader').style.display = 'none';
+        };
+
+        function fetchVideosFromAPI(query, page) {
             if (isFetching) return;
             isFetching = true;
             document.getElementById('loader').style.display = 'block';
 
-            try {
-                const safeQuery = encodeURIComponent(query);
-                const targetUrl = `https://www.eporner.com/api/v2/video/search/?query=${safeQuery}&per_page=30&page=${page}`;
-                
-                // Multiple reliable fallback proxies
-                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
-
-                const response = await fetch(proxyUrl);
-                if (!response.ok) throw new Error('Failed');
-
-                const data = await response.json();
-
-                if (data && data.videos) {
-                    const fetchedVids = data.videos.map(v => {
-                        let cleanUrl = `https://www.eporner.com/embed/${v.id}/`; 
-                        const safeTitle = v.title ? v.title.replace(/['"]/g, "") : "Video";
-                        const safeThumb = (v.default_thumb && v.default_thumb.src) ? v.default_thumb.src : "";
-                        const videoDuration = formatDuration(v.length_sec);
-
-                        return {
-                            id: v.id,
-                            title: safeTitle,
-                            embedUrl: cleanUrl, 
-                            thumb: safeThumb,
-                            duration: videoDuration
-                        };
-                    });
-
-                    liveVideos = [...liveVideos, ...fetchedVids];
-                    renderGrid(liveVideos);
-                } else {
-                    showToast("No videos found.");
-                }
-            } catch (error) {
-                console.error("Fetch Error:", error);
-                // Fallback to codetabs proxy if allorigins fails
-                try {
-                    const targetUrl = `https://www.eporner.com/api/v2/video/search/?query=${encodeURIComponent(query)}&per_page=30&page=${page}`;
-                    const fallbackRes = await fetch(`https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(targetUrl)}`);
-                    const data = await fallbackRes.json();
-                    
-                    if (data && data.videos) {
-                        const fetchedVids = data.videos.map(v => ({
-                            id: v.id,
-                            title: v.title ? v.title.replace(/['"]/g, "") : "Video",
-                            embedUrl: `https://www.eporner.com/embed/${v.id}/`,
-                            thumb: v.default_thumb ? v.default_thumb.src : "",
-                            duration: formatDuration(v.length_sec)
-                        }));
-                        liveVideos = [...liveVideos, ...fetchedVids];
-                        renderGrid(liveVideos);
-                    }
-                } catch(e) {
-                    showToast("Network error. Please refresh.");
-                }
-            } finally {
+            const safeQuery = encodeURIComponent(query);
+            
+            // JSONP Direct Fetch - No Proxy Needed!
+            const script = document.createElement('script');
+            script.src = `https://www.eporner.com/api/v2/video/search/?query=${safeQuery}&per_page=30&page=${page}&format=json&callback=handleEpornerData`;
+            
+            script.onerror = function() {
+                showToast("⚠️ API Blocked! Please turn ON your VPN.");
                 isFetching = false;
                 document.getElementById('loader').style.display = 'none';
-            }
+            };
+
+            document.body.appendChild(script);
+            
+            // Script remove kora jate site heavy na hoy
+            setTimeout(() => {
+                if (script.parentNode) {
+                    script.parentNode.removeChild(script);
+                }
+            }, 5000);
         }
 
         function renderGrid(videos) {
@@ -232,6 +220,7 @@
             document.getElementById('theater-title').textContent = title;
             document.getElementById('theaterMode').style.display = 'flex';
             
+            // Clean direct iframe (VPN obossoi on thakte hobe play korar jonno)
             document.getElementById('theater-container').innerHTML = `
                 <iframe id="main-video-frame" src="${url}" frameborder="0" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="autoplay; fullscreen"></iframe>
             `;
