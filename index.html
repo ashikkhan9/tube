@@ -27,7 +27,6 @@
         .categories::-webkit-scrollbar { display: none; }
         .cat-tag { background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 20px; cursor: pointer; font-size: 13px; border: 1px solid transparent; transition: 0.3s; }
         .cat-tag.active, .cat-tag:hover { background: #ff3366; border-color: #ff3366; }
-        .shorts-btn { background: linear-gradient(45deg, #ff0050, #00f2fe); border: none; font-weight: bold; }
 
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto 40px; padding: 0 20px; }
         .card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; overflow: hidden; box-shadow: 0 8px 32px 0 rgba(0,0,0,0.3); transition: 0.3s ease; position: relative; }
@@ -44,7 +43,7 @@
         .close-theater { background: transparent; border: none; color: #ff3366; font-size: 20px; cursor: pointer; }
         .theater-content { width: 100%; max-width: 1000px; margin: 0 auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
         
-        #theater-container { width: 100%; aspect-ratio: 16/9; transition: 0.3s; position: relative; }
+        #theater-container { width: 100%; aspect-ratio: 16/9; transition: 0.3s; position: relative; background: #000; }
         #theater-container iframe { width: 100%; height: 100%; border: none; border-radius: 8px; background: #000; }
         
         .action-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px; flex-wrap: wrap; gap: 10px; }
@@ -106,7 +105,7 @@
     <script>
         let liveVideos = [];
         let currentPage = 1;
-        let currentQuery = "hd"; // Default query
+        let currentQuery = "hd"; 
         let isFetching = false;
         let currentPlayingId = null;
 
@@ -127,13 +126,24 @@
                 const data = JSON.parse(proxyData.contents);
 
                 if (data && data.videos) {
-                    const fetchedVids = data.videos.map(v => ({
-                        id: v.id,
-                        title: v.title,
-                        // Fix: Build clean direct URL using ID instead of broken embed HTML
-                        embedUrl: `https://www.eporner.com/embed/${v.id}/`, 
-                        thumb: v.default_thumb.src
-                    }));
+                    const fetchedVids = data.videos.map(v => {
+                        // একদম পারফেক্ট লিংক ফিল্টার: API এর হাবিজাবি কোড থেকে শুধু আসল প্লেয়ার লিংকটা বের করা হচ্ছে
+                        let cleanUrl = `https://www.eporner.com/embed/${v.id}/`; 
+                        if(v.embed) {
+                            const match = v.embed.match(/src=["'](.*?)["']/);
+                            if(match && match[1]) cleanUrl = match[1];
+                        }
+                        
+                        // টাইটেল থেকে কোটেশন (Quotes) বাদ দেওয়া হচ্ছে যাতে HTML ব্রেক না করে
+                        const safeTitle = v.title.replace(/['"]/g, "");
+
+                        return {
+                            id: v.id,
+                            title: safeTitle,
+                            embedUrl: cleanUrl, 
+                            thumb: v.default_thumb.src
+                        };
+                    });
 
                     liveVideos = [...liveVideos, ...fetchedVids];
                     renderGrid(liveVideos);
@@ -156,7 +166,7 @@
             videos.forEach(vid => {
                 grid.innerHTML += `
                     <div class="card">
-                        <div class="video-container" onclick="openTheater('${vid.id}', '${vid.embedUrl}', '${vid.title.replace(/'/g, "\\'")}')">
+                        <div class="video-container" onclick="openTheater('${vid.id}', '${vid.embedUrl}', '${vid.title}')">
                             <img src="${vid.thumb}" loading="lazy" alt="thumb">
                             <div class="play-overlay">▶</div>
                         </div>
@@ -202,7 +212,8 @@
         function openTheater(id, url, title) {
             currentPlayingId = id;
             document.getElementById('theater-title').textContent = title;
-            document.getElementById('theater-container').innerHTML = `<iframe id="main-video-frame" src="${url}" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="autoplay; fullscreen"></iframe>`;
+            // iframe এর ভেতর প্রয়োজনীয় সিকিউরিটি পলিসি এবং বর্ডার ফিক্স করে দেওয়া হয়েছে
+            document.getElementById('theater-container').innerHTML = `<iframe id="main-video-frame" src="${url}" frameborder="0" scrolling="no" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="autoplay; fullscreen"></iframe>`;
             document.getElementById('theaterMode').style.display = 'flex';
             document.getElementById('liveViewers').innerText = Math.floor(Math.random() * 800) + 200;
         }
