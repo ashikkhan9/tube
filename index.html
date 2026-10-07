@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xtube Premium - Live Direct Play</title>
+    <title>Xtube Premium - Ultra Fast API</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: #fff; min-height: 100vh; padding-top: 130px; overflow-x: hidden; transition: background 0.3s; }
@@ -38,7 +38,6 @@
         .close-theater { background: transparent; border: none; color: #ff3366; font-size: 20px; cursor: pointer; }
         .theater-content { width: 100%; max-width: 1000px; margin: 0 auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
         
-        /* Perfect Responsive Player Setup */
         #theater-container { width: 100%; padding-bottom: 56.25%; position: relative; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid #333; }
         #theater-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; background: #000; }
         
@@ -113,27 +112,19 @@
             try {
                 const safeQuery = encodeURIComponent(query);
                 const epornerUrl = `https://www.eporner.com/api/v2/video/search/?query=${safeQuery}&per_page=30&page=${page}`;
-                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(epornerUrl)}`;
+                
+                // Updated to Direct RAW proxy for faster and blocker-resistant fetching
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(epornerUrl)}`;
 
                 const response = await fetch(proxyUrl);
                 if (!response.ok) throw new Error('Network response was not ok');
                 
-                const proxyData = await response.json();
-                const data = JSON.parse(proxyData.contents);
+                // Directly parsing the JSON without needing the '.contents' wrapper
+                const data = await response.json();
 
                 if (data && data.videos) {
                     const fetchedVids = data.videos.map(v => {
                         let cleanUrl = `https://www.eporner.com/embed/${v.id}/`; 
-                        
-                        if (v.embed) {
-                            const match = v.embed.match(/src=["'](.*?)["']/);
-                            if (match && match[1]) {
-                                cleanUrl = match[1];
-                                if (cleanUrl.startsWith('//')) cleanUrl = 'https:' + cleanUrl;
-                                if (cleanUrl.startsWith('http:')) cleanUrl = cleanUrl.replace('http:', 'https:');
-                            }
-                        }
-                        
                         const safeTitle = v.title ? v.title.replace(/['"]/g, "") : "Video";
                         const safeThumb = v.default_thumb ? v.default_thumb.src : "";
 
@@ -213,7 +204,7 @@
             document.getElementById('theater-title').textContent = title;
             document.getElementById('theaterMode').style.display = 'flex';
             
-            // Clean direct iframe injection with no extra security blockers
+            // Clean simple iframe structure to prevent playback issues
             document.getElementById('theater-container').innerHTML = `
                 <iframe id="main-video-frame" src="${url}" frameborder="0" scrolling="no" allowfullscreen allow="autoplay; fullscreen"></iframe>
             `;
