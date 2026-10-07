@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xtube Premium - Final Auto</title>
+    <title>Xtube Premium</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: #fff; min-height: 100vh; padding-top: 130px; overflow-x: hidden; transition: background 0.3s; }
@@ -75,7 +75,7 @@
     </div>
 
     <div class="grid" id="video-grid"></div>
-    <div class="loader" id="loader">Fetching Premium Videos... 🚀</div>
+    <div class="loader" id="loader">Loading Videos... 🚀</div>
 
     <div id="theaterMode">
         <div class="theater-header">
@@ -121,33 +121,13 @@
                 const safeQuery = encodeURIComponent(query);
                 const targetUrl = `https://www.eporner.com/api/v2/video/search/?query=${safeQuery}&per_page=30&page=${page}`;
                 
-                // 2 Powerful Proxies - VPN OFF rakhar try korbe jate block na khay
-                const proxies = [
-                    `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`,
-                    `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(targetUrl)}`
-                ];
+                // Multiple reliable fallback proxies
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
 
-                let data = null;
-                
-                // Advanced Fallback Loop
-                for (let proxy of proxies) {
-                    try {
-                        const response = await fetch(proxy);
-                        if (response.ok) {
-                            const text = await response.text();
-                            // Allorigins wraps data in 'contents'
-                            if (proxy.includes('allorigins')) {
-                                const parsed = JSON.parse(text);
-                                if(parsed.contents) data = JSON.parse(parsed.contents);
-                            } else {
-                                data = JSON.parse(text);
-                            }
-                            if (data && data.videos) break; // If we get videos, stop loop
-                        }
-                    } catch (err) {
-                        console.log("Trying next proxy...");
-                    }
-                }
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error('Failed');
+
+                const data = await response.json();
 
                 if (data && data.videos) {
                     const fetchedVids = data.videos.map(v => {
@@ -168,11 +148,30 @@
                     liveVideos = [...liveVideos, ...fetchedVids];
                     renderGrid(liveVideos);
                 } else {
-                    showToast("No data. Please turn OFF your VPN and refresh.");
+                    showToast("No videos found.");
                 }
             } catch (error) {
                 console.error("Fetch Error:", error);
-                showToast("Network Error.");
+                // Fallback to codetabs proxy if allorigins fails
+                try {
+                    const targetUrl = `https://www.eporner.com/api/v2/video/search/?query=${encodeURIComponent(query)}&per_page=30&page=${page}`;
+                    const fallbackRes = await fetch(`https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(targetUrl)}`);
+                    const data = await fallbackRes.json();
+                    
+                    if (data && data.videos) {
+                        const fetchedVids = data.videos.map(v => ({
+                            id: v.id,
+                            title: v.title ? v.title.replace(/['"]/g, "") : "Video",
+                            embedUrl: `https://www.eporner.com/embed/${v.id}/`,
+                            thumb: v.default_thumb ? v.default_thumb.src : "",
+                            duration: formatDuration(v.length_sec)
+                        }));
+                        liveVideos = [...liveVideos, ...fetchedVids];
+                        renderGrid(liveVideos);
+                    }
+                } catch(e) {
+                    showToast("Network error. Please refresh.");
+                }
             } finally {
                 isFetching = false;
                 document.getElementById('loader').style.display = 'none';
@@ -233,7 +232,6 @@
             document.getElementById('theater-title').textContent = title;
             document.getElementById('theaterMode').style.display = 'flex';
             
-            // Solid secure iframe structure
             document.getElementById('theater-container').innerHTML = `
                 <iframe id="main-video-frame" src="${url}" frameborder="0" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="autoplay; fullscreen"></iframe>
             `;
