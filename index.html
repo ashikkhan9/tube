@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xtube Premium - Stable Stream</title>
+    <title>Xtube Premium - Cloudflare Bypass</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: #fff; min-height: 100vh; padding-top: 130px; overflow-x: hidden; transition: background 0.3s; }
@@ -75,7 +75,7 @@
     </div>
 
     <div class="grid" id="video-grid"></div>
-    <div class="loader" id="loader">Loading Live Stream... 🚀</div>
+    <div class="loader" id="loader">Bypassing ISP Block... 🚀</div>
 
     <div id="theaterMode">
         <div class="theater-header">
@@ -91,7 +91,7 @@
                     <button class="btn-action btn-like" onclick="likeVideo()">❤️ Like</button>
                     <button class="btn-action btn-share" onclick="shareVideo()">🔗 Share</button>
                     <button class="btn-action btn-fullscreen" onclick="goFullscreen()">🔲 Full Screen</button>
-                    <a href="https://your-adsterra-direct-link.com" target="_blank" class="btn-action" style="background:#25D366; color:#000;">⬇ Download HD</a>
+                    <a href="#" class="btn-action" style="background:#25D366; color:#000;">⬇ Download HD</a>
                 </div>
             </div>
         </div>
@@ -119,12 +119,16 @@
 
             try {
                 const safeQuery = encodeURIComponent(query);
-                // Using a multi-gateway CORS bypass directly to JSON endpoint
                 const targetUrl = `https://www.eporner.com/api/v2/video/search/?query=${safeQuery}&per_page=30&page=${page}`;
-                const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+                
+                // Magic Line: ETA CLOUDFLARE WORKER USE KORBE (/api/proxy)
+                const proxyUrl = `/api/proxy?url=${encodeURIComponent(targetUrl)}`;
 
                 const response = await fetch(proxyUrl);
-                if (!response.ok) throw new Error('Network error');
+                
+                if (!response.ok) {
+                     throw new Error('Proxy failed to fetch');
+                }
 
                 const data = await response.json();
 
@@ -151,28 +155,7 @@
                 }
             } catch (error) {
                 console.error("Fetch Error:", error);
-                // Fallback secondary proxy
-                try {
-                    const targetUrl = `https://www.eporner.com/api/v2/video/search/?query=${encodeURIComponent(query)}&per_page=30&page=${page}`;
-                    const fallbackRes = await fetch(`https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(targetUrl)}`);
-                    const data = await fallbackRes.json();
-                    
-                    if (data && data.videos) {
-                        const fetchedVids = data.videos.map(v => ({
-                            id: v.id,
-                            title: v.title ? v.title.replace(/['"]/g, "") : "Video",
-                            embedUrl: `https://www.eporner.com/embed/${v.id}/`,
-                            thumb: v.default_thumb ? v.default_thumb.src : "",
-                            duration: formatDuration(v.length_sec)
-                        }));
-                        liveVideos = [...liveVideos, ...fetchedVids];
-                        renderGrid(liveVideos);
-                    } else {
-                        throw new Error();
-                    }
-                } catch(e) {
-                    showToast("Connection failed. Please check VPN or refresh.");
-                }
+                showToast("Connection Error. Please check your network.");
             } finally {
                 isFetching = false;
                 document.getElementById('loader').style.display = 'none';
