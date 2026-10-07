@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Advanced Referrer Bypass -->
     <meta name="referrer" content="no-referrer">
     <title>Xtube Premium - Advanced Auto API</title>
     <style>
@@ -12,11 +11,6 @@
         
         body.dark-mode { background: #000; }
         body.dark-mode nav, body.dark-mode .sub-nav, body.dark-mode .card, body.dark-mode .modal-content { background: #0a0a0a; border-color: #222; box-shadow: none; }
-        
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); backdrop-filter: blur(15px); z-index: 9999; display: flex; justify-content: center; align-items: center; text-align: center; }
-        .modal-content { background: #1e1e1e; padding: 40px; border-radius: 12px; border: 1px solid #ff3366; max-width: 400px; box-shadow: 0 0 30px rgba(255,51,102,0.3); }
-        .modal-content h2 { color: #ff3366; margin-bottom: 15px; font-size: 24px; }
-        .modal-btn { background: #ff3366; color: #fff; border: none; padding: 12px 25px; font-size: 16px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; }
         
         nav { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: rgba(15, 12, 41, 0.9); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; padding: 0 20px; z-index: 1000; transition: 0.3s; }
         .logo { font-size: 24px; font-weight: bold; color: #ff3366; text-decoration: none; text-shadow: 0 0 10px rgba(255,51,102,0.5); }
@@ -45,8 +39,7 @@
         .close-theater { background: transparent; border: none; color: #ff3366; font-size: 20px; cursor: pointer; }
         .theater-content { width: 100%; max-width: 1000px; margin: 0 auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
         
-        /* Advanced Responsive Iframe Hack */
-        #theater-container { width: 100%; padding-bottom: 56.25%; position: relative; background: #000; border-radius: 8px; overflow: hidden; }
+        #theater-container { width: 100%; padding-bottom: 56.25%; position: relative; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid #333; }
         #theater-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; background: #000; }
         
         .action-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px; flex-wrap: wrap; gap: 10px; }
@@ -55,6 +48,7 @@
         .btn-like { background: #ff3366; color: #fff; }
         .btn-share { background: #0088cc; color: #fff; }
         .btn-fullscreen { background: #fff; color: #000; }
+        .btn-direct { background: #ffcc00; color: #000; }
         
         .loader { text-align: center; padding: 20px; color: #ff3366; font-weight: bold; font-size: 18px; display: none; width: 100%; }
         
@@ -91,14 +85,8 @@
         <div class="theater-content">
             <div id="theater-container"></div>
             
-            <div class="action-bar">
-                <div style="color: #ff3366; font-weight: bold;">🔴 <span id="liveViewers">420</span> watching</div>
-                <div class="action-buttons">
-                    <button class="btn-action btn-like" onclick="likeVideo()">❤️ Like</button>
-                    <button class="btn-action btn-share" onclick="shareVideo()">🔗 Share</button>
-                    <button class="btn-action btn-fullscreen" onclick="goFullscreen()">🔲 Full Screen</button>
-                    <a href="https://your-adsterra-direct-link.com" target="_blank" class="btn-action" style="background:#25D366; color:#000;">⬇ Download HD</a>
-                </div>
+            <div class="action-bar" id="dynamic-action-bar">
+                <!-- Buttons will be injected here dynamically -->
             </div>
         </div>
     </div>
@@ -131,13 +119,6 @@
                 if (data && data.videos) {
                     const fetchedVids = data.videos.map(v => {
                         let cleanUrl = `https://www.eporner.com/embed/${v.id}/`; 
-                        if(v.embed) {
-                            const match = v.embed.match(/src=["'](.*?)["']/);
-                            if(match && match[1]) {
-                                cleanUrl = match[1];
-                                if(cleanUrl.startsWith('//')) cleanUrl = 'https:' + cleanUrl;
-                            }
-                        }
                         const safeTitle = v.title.replace(/['"]/g, "");
 
                         return {
@@ -214,14 +195,21 @@
         function openTheater(id, url, title) {
             currentPlayingId = id;
             document.getElementById('theater-title').textContent = title;
-            
-            // Advanced Order: Show the modal FIRST, then inject iframe so browser calculates dimensions properly
             document.getElementById('theaterMode').style.display = 'flex';
             
-            // Advanced Iframe with no-referrer
-            document.getElementById('theater-container').innerHTML = `<iframe id="main-video-frame" src="${url}" frameborder="0" scrolling="no" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" referrerpolicy="no-referrer" allow="autoplay; fullscreen"></iframe>`;
+            // Advanced sandbox configuration added to bypass browser restrictions
+            document.getElementById('theater-container').innerHTML = `<iframe id="main-video-frame" src="${url}" sandbox="allow-scripts allow-same-origin allow-presentation allow-popups" frameborder="0" scrolling="no" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" referrerpolicy="no-referrer" allow="autoplay; fullscreen"></iframe>`;
             
-            document.getElementById('liveViewers').innerText = Math.floor(Math.random() * 800) + 200;
+            // Injecting Dynamic Buttons including the Direct Play Fix
+            document.getElementById('dynamic-action-bar').innerHTML = `
+                <div style="color: #ff3366; font-weight: bold;">🔴 <span>${Math.floor(Math.random() * 800) + 200}</span> watching</div>
+                <div class="action-buttons">
+                    <button class="btn-action btn-like" onclick="likeVideo()">❤️ Like</button>
+                    <button class="btn-action btn-share" onclick="shareVideo()">🔗 Share</button>
+                    <button class="btn-action btn-fullscreen" onclick="goFullscreen()">🔲 Full Screen</button>
+                    <a href="${url}" target="_blank" class="btn-action btn-direct">🚀 Play Direct (Fix)</a>
+                </div>
+            `;
         }
 
         function closeTheater() {
