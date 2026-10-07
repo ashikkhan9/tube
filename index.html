@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xtube Premium - ISP Bypass with Duration</title>
+    <title>Xtube Premium - Ultimate Stable API</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: #fff; min-height: 100vh; padding-top: 130px; overflow-x: hidden; transition: background 0.3s; }
@@ -30,7 +30,6 @@
         .video-container img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
         .play-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 40px; color: rgba(255,255,255,0.8); background: rgba(0,0,0,0.5); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; pointer-events: none; }
         
-        /* Duration Badge Style */
         .video-duration { position: absolute; bottom: 8px; right: 8px; background: rgba(0, 0, 0, 0.8); color: #fff; font-size: 11px; font-weight: bold; padding: 3px 6px; border-radius: 4px; z-index: 5; border: 1px solid rgba(255,255,255,0.2); }
 
         .info { padding: 12px; }
@@ -76,7 +75,7 @@
     </div>
 
     <div class="grid" id="video-grid"></div>
-    <div class="loader" id="loader">Bypassing Network & Fetching Videos... 🚀</div>
+    <div class="loader" id="loader">Connecting to Server... 🚀</div>
 
     <div id="theaterMode">
         <div class="theater-header">
@@ -107,7 +106,6 @@
         let isFetching = false;
         let currentPlayingId = null;
 
-        // Seconds theke MM:SS format korar function
         function formatDuration(seconds) {
             if (!seconds) return "00:00";
             let mins = Math.floor(seconds / 60);
@@ -123,19 +121,38 @@
             try {
                 const safeQuery = encodeURIComponent(query);
                 const epornerUrl = `https://www.eporner.com/api/v2/video/search/?query=${safeQuery}&per_page=30&page=${page}`;
-                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(epornerUrl)}`;
-
-                const response = await fetch(proxyUrl);
-                const data = await response.json();
                 
-                const apiData = JSON.parse(data.contents);
+                // Advanced RAW Proxies - allorigins kete direct json parsing
+                const proxies = [
+                    `https://corsproxy.io/?${encodeURIComponent(epornerUrl)}`,
+                    `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(epornerUrl)}`
+                ];
 
-                if (apiData && apiData.videos) {
-                    const fetchedVids = apiData.videos.map(v => {
+                let data = null;
+                let success = false;
+
+                // Proxy Rotator
+                for (let proxy of proxies) {
+                    try {
+                        const response = await fetch(proxy);
+                        if (response.ok) {
+                            data = await response.json();
+                            if (data && data.videos) {
+                                success = true;
+                                break;
+                            }
+                        }
+                    } catch (e) {
+                        console.log("Proxy failed, trying next...");
+                    }
+                }
+
+                if (success && data && data.videos) {
+                    const fetchedVids = data.videos.map(v => {
                         let cleanUrl = `https://www.eporner.com/embed/${v.id}/`; 
                         const safeTitle = v.title ? v.title.replace(/['"]/g, "") : "Video";
                         const safeThumb = (v.default_thumb && v.default_thumb.src) ? v.default_thumb.src : "";
-                        const videoDuration = formatDuration(v.length_sec); // Real duration mapping
+                        const videoDuration = formatDuration(v.length_sec);
 
                         return {
                             id: v.id,
@@ -149,7 +166,7 @@
                     liveVideos = [...liveVideos, ...fetchedVids];
                     renderGrid(liveVideos);
                 } else {
-                    showToast("No more videos found.");
+                    showToast("No videos found. Please try refreshing.");
                 }
             } catch (error) {
                 console.error("Fetch Error:", error);
@@ -217,15 +234,15 @@
             
             document.getElementById('theater-container').innerHTML = `
                 <div style="display:flex; justify-content:center; align-items:center; height:100%; position:absolute; width:100%; color:#ff3366; font-weight:bold; font-size:15px; text-align:center; padding:20px;">
-                    🚀 Bypassing BD Network & Extracting Raw Video...
+                    🚀 Fetching Raw Video...
                 </div>
             `;
             
             try {
-                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+                // Fixed Raw HTML extraction for Direct MP4 Link
+                const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
                 const res = await fetch(proxyUrl);
-                const data = await res.json();
-                const html = data.contents || "";
+                const html = await res.text(); 
                 
                 const mp4Match = html.match(/https:[^"']+\.mp4[^"']*/i);
                 
