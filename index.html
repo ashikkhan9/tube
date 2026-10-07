@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xtube Premium - Ultra Stable API</title>
+    <title>Xtube Premium - Pornhub API</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: #fff; min-height: 100vh; padding-top: 130px; overflow-x: hidden; transition: background 0.3s; }
@@ -73,7 +73,7 @@
     </div>
 
     <div class="grid" id="video-grid"></div>
-    <div class="loader" id="loader">Fetching Live Videos from API... 🚀</div>
+    <div class="loader" id="loader">Fetching Pornhub API... 🚀</div>
 
     <div id="theaterMode">
         <div class="theater-header">
@@ -111,30 +111,30 @@
 
             try {
                 const safeQuery = encodeURIComponent(query);
-                const epornerUrl = `https://www.eporner.com/api/v2/video/search/?query=${safeQuery}&per_page=30&page=${page}`;
                 
-                // Changed to highly stable CodeTabs proxy which returns direct JSON without breaking
-                const proxyUrl = `https://api.codetabs.com/v1/proxy/?quest=${epornerUrl}`;
+                // Pornhub Webmaster API setup
+                const phUrl = `https://www.pornhub.com/webmasters/search?search=${safeQuery}&page=${page}`;
+                
+                // Using stable allorigins proxy to bypass CORS
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(phUrl)}`;
 
                 const response = await fetch(proxyUrl);
+                const proxyData = await response.json();
                 
-                if (!response.ok) {
-                    throw new Error('Proxy Server Issue');
-                }
-
-                // Parse direct raw json
-                const data = await response.json();
+                // Parse the data received from Pornhub
+                const data = JSON.parse(proxyData.contents);
 
                 if (data && data.videos) {
                     const fetchedVids = data.videos.map(v => {
-                        let cleanUrl = `https://www.eporner.com/embed/${v.id}/`; 
+                        // Pornhub direct iframe embed format
+                        let cleanUrl = `https://www.pornhub.com/embed/${v.video_id}`; 
                         const safeTitle = v.title ? v.title.replace(/['"]/g, "") : "Video";
 
                         return {
-                            id: v.id,
+                            id: v.video_id,
                             title: safeTitle,
                             embedUrl: cleanUrl, 
-                            thumb: v.default_thumb ? v.default_thumb.src : ""
+                            thumb: v.default_thumb
                         };
                     });
 
@@ -206,9 +206,9 @@
             document.getElementById('theater-title').textContent = title;
             document.getElementById('theaterMode').style.display = 'flex';
             
-            // Clean direct iframe injection
+            // Clean Pornhub iframe injection
             document.getElementById('theater-container').innerHTML = `
-                <iframe id="main-video-frame" src="${url}" frameborder="0" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="autoplay; fullscreen"></iframe>
+                <iframe id="main-video-frame" src="${url}" frameborder="0" width="100%" height="100%" scrolling="no" allowfullscreen allow="autoplay; fullscreen"></iframe>
             `;
             
             document.getElementById('liveViewers').innerText = Math.floor(Math.random() * 800) + 200;
