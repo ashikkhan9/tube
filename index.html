@@ -65,7 +65,7 @@
     <nav>
         <a href="#" class="logo">Xtube Auto</a>
         <div class="nav-right">
-            <input type="text" class="search-bar" id="searchInput" placeholder="Search videos..." onchange="searchLiveVideos()">
+            <input type="text" class="search-bar" id="searchInput" placeholder="Search videos..." onkeyup="searchLiveVideos(event)">
             <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
         </div>
     </nav>
@@ -110,30 +110,28 @@
         let isFetching = false;
         let currentPlayingId = null;
 
-        // Core API Fetch Function using CORS Proxy
         async function fetchVideosFromAPI(query, page) {
             if (isFetching) return;
             isFetching = true;
             document.getElementById('loader').style.display = 'block';
 
             try {
-                // Eporner Live API Endpoint
-                const apiUrl = encodeURIComponent(`https://www.eporner.com/api/v2/video/search/?query=${query}&per_page=30&page=${page}`);
-                
-                // AllOrigins Free CORS Proxy
-                const proxyUrl = `https://api.allorigins.win/get?url=${apiUrl}`;
+                const safeQuery = encodeURIComponent(query);
+                const epornerUrl = `https://www.eporner.com/api/v2/video/search/?query=${safeQuery}&per_page=30&page=${page}`;
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(epornerUrl)}`;
 
                 const response = await fetch(proxyUrl);
                 if (!response.ok) throw new Error('Network response was not ok');
                 
                 const proxyData = await response.json();
-                const data = JSON.parse(proxyData.contents); // Decode actual JSON
+                const data = JSON.parse(proxyData.contents);
 
                 if (data && data.videos) {
                     const fetchedVids = data.videos.map(v => ({
                         id: v.id,
                         title: v.title,
-                        embedUrl: v.embed,
+                        // Fix: Build clean direct URL using ID instead of broken embed HTML
+                        embedUrl: `https://www.eporner.com/embed/${v.id}/`, 
                         thumb: v.default_thumb.src
                     }));
 
@@ -151,7 +149,6 @@
             }
         }
 
-        // Render to Grid
         function renderGrid(videos) {
             const grid = document.getElementById('video-grid');
             grid.innerHTML = '';
@@ -169,18 +166,19 @@
             });
         }
 
-        // Search bar action
-        function searchLiveVideos() {
+        function searchLiveVideos(event) {
+            if (event && event.key !== 'Enter') return;
+            
             const val = document.getElementById('searchInput').value.trim();
             if(val) {
                 currentQuery = val;
                 liveVideos = [];
                 currentPage = 1;
                 fetchVideosFromAPI(currentQuery, currentPage);
+                document.getElementById('searchInput').blur(); 
             }
         }
 
-        // Category Tag action
         function loadCategory(cat) {
             document.querySelectorAll('.cat-tag').forEach(el => el.classList.remove('active'));
             event.target.classList.add('active');
@@ -192,7 +190,6 @@
             fetchVideosFromAPI(currentQuery, currentPage);
         }
 
-        // Infinite Scroll - Auto load next page
         window.addEventListener('scroll', () => {
             if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 800) {
                 if (!isFetching) {
@@ -202,7 +199,6 @@
             }
         });
 
-        // Player Functions
         function openTheater(id, url, title) {
             currentPlayingId = id;
             document.getElementById('theater-title').textContent = title;
@@ -243,7 +239,6 @@
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
         }
 
-        // Initial Fetch on Page Load
         window.onload = function() {
             fetchVideosFromAPI(currentQuery, currentPage);
         };
