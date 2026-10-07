@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xtube Premium - Ultimate Stable API</title>
+    <title>Xtube Premium - Final Auto</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: #fff; min-height: 100vh; padding-top: 130px; overflow-x: hidden; transition: background 0.3s; }
@@ -24,7 +24,7 @@
         .cat-tag.active, .cat-tag:hover { background: #ff3366; border-color: #ff3366; }
 
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto 40px; padding: 0 20px; }
-        .card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; overflow: hidden; box-shadow: 0 8px 32px 0 rgba(0,0,0,0.3); transition: 0.3s ease; cursor: pointer; }
+        .card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; overflow: hidden; box-shadow: 0 8px 32px 0 rgba(0,0,0,0.3); transition: 0.3s ease; cursor: pointer; position: relative; }
         .card:hover { transform: translateY(-5px); border-color: rgba(255,51,102,0.3); }
         .video-container { position: relative; width: 100%; padding-bottom: 56.25%; background: #000; overflow: hidden; }
         .video-container img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
@@ -41,7 +41,7 @@
         .theater-content { width: 100%; max-width: 1000px; margin: 0 auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
         
         #theater-container { width: 100%; padding-bottom: 56.25%; position: relative; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid #333; }
-        #theater-container iframe, #theater-container video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; background: #000; }
+        #theater-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; background: #000; }
         
         .action-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px; flex-wrap: wrap; gap: 10px; }
         .action-buttons { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
@@ -75,7 +75,7 @@
     </div>
 
     <div class="grid" id="video-grid"></div>
-    <div class="loader" id="loader">Connecting to Server... 🚀</div>
+    <div class="loader" id="loader">Fetching Premium Videos... 🚀</div>
 
     <div id="theaterMode">
         <div class="theater-header">
@@ -104,7 +104,6 @@
         let currentPage = 1;
         let currentQuery = "hd"; 
         let isFetching = false;
-        let currentPlayingId = null;
 
         function formatDuration(seconds) {
             if (!seconds) return "00:00";
@@ -120,34 +119,37 @@
 
             try {
                 const safeQuery = encodeURIComponent(query);
-                const epornerUrl = `https://www.eporner.com/api/v2/video/search/?query=${safeQuery}&per_page=30&page=${page}`;
+                const targetUrl = `https://www.eporner.com/api/v2/video/search/?query=${safeQuery}&per_page=30&page=${page}`;
                 
-                // Advanced RAW Proxies - allorigins kete direct json parsing
+                // 2 Powerful Proxies - VPN OFF rakhar try korbe jate block na khay
                 const proxies = [
-                    `https://corsproxy.io/?${encodeURIComponent(epornerUrl)}`,
-                    `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(epornerUrl)}`
+                    `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`,
+                    `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(targetUrl)}`
                 ];
 
                 let data = null;
-                let success = false;
-
-                // Proxy Rotator
+                
+                // Advanced Fallback Loop
                 for (let proxy of proxies) {
                     try {
                         const response = await fetch(proxy);
                         if (response.ok) {
-                            data = await response.json();
-                            if (data && data.videos) {
-                                success = true;
-                                break;
+                            const text = await response.text();
+                            // Allorigins wraps data in 'contents'
+                            if (proxy.includes('allorigins')) {
+                                const parsed = JSON.parse(text);
+                                if(parsed.contents) data = JSON.parse(parsed.contents);
+                            } else {
+                                data = JSON.parse(text);
                             }
+                            if (data && data.videos) break; // If we get videos, stop loop
                         }
-                    } catch (e) {
-                        console.log("Proxy failed, trying next...");
+                    } catch (err) {
+                        console.log("Trying next proxy...");
                     }
                 }
 
-                if (success && data && data.videos) {
+                if (data && data.videos) {
                     const fetchedVids = data.videos.map(v => {
                         let cleanUrl = `https://www.eporner.com/embed/${v.id}/`; 
                         const safeTitle = v.title ? v.title.replace(/['"]/g, "") : "Video";
@@ -166,11 +168,11 @@
                     liveVideos = [...liveVideos, ...fetchedVids];
                     renderGrid(liveVideos);
                 } else {
-                    showToast("No videos found. Please try refreshing.");
+                    showToast("No data. Please turn OFF your VPN and refresh.");
                 }
             } catch (error) {
                 console.error("Fetch Error:", error);
-                showToast("Network blocked. Please try refreshing.");
+                showToast("Network Error.");
             } finally {
                 isFetching = false;
                 document.getElementById('loader').style.display = 'none';
@@ -227,41 +229,14 @@
             }
         });
 
-        async function openTheater(id, url, title) {
-            currentPlayingId = id;
+        function openTheater(id, url, title) {
             document.getElementById('theater-title').textContent = title;
             document.getElementById('theaterMode').style.display = 'flex';
             
+            // Solid secure iframe structure
             document.getElementById('theater-container').innerHTML = `
-                <div style="display:flex; justify-content:center; align-items:center; height:100%; position:absolute; width:100%; color:#ff3366; font-weight:bold; font-size:15px; text-align:center; padding:20px;">
-                    🚀 Fetching Raw Video...
-                </div>
+                <iframe id="main-video-frame" src="${url}" frameborder="0" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="autoplay; fullscreen"></iframe>
             `;
-            
-            try {
-                // Fixed Raw HTML extraction for Direct MP4 Link
-                const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
-                const res = await fetch(proxyUrl);
-                const html = await res.text(); 
-                
-                const mp4Match = html.match(/https:[^"']+\.mp4[^"']*/i);
-                
-                if (mp4Match) {
-                    let directUrl = mp4Match[0].replace(/\\\//g, '/'); 
-                    
-                    document.getElementById('theater-container').innerHTML = `
-                        <video id="main-video-frame" src="${directUrl}" controls autoplay></video>
-                    `;
-                } else {
-                    document.getElementById('theater-container').innerHTML = `
-                        <iframe id="main-video-frame" src="${url}" frameborder="0" scrolling="no" allowfullscreen allow="autoplay; fullscreen"></iframe>
-                    `;
-                }
-            } catch(e) {
-                document.getElementById('theater-container').innerHTML = `
-                    <iframe id="main-video-frame" src="${url}" frameborder="0" scrolling="no" allowfullscreen allow="autoplay; fullscreen"></iframe>
-                `;
-            }
             
             document.getElementById('liveViewers').innerText = Math.floor(Math.random() * 800) + 200;
         }
@@ -274,7 +249,6 @@
         function goFullscreen() {
             const player = document.getElementById('main-video-frame');
             if (player && player.requestFullscreen) player.requestFullscreen();
-            else if (player && player.webkitRequestFullscreen) player.webkitRequestFullscreen();
         }
 
         function likeVideo() {
