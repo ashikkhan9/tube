@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xtube Premium - Stable Engine</title>
+    <title>Xtube Auto - Bulletproof API</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: #fff; min-height: 100vh; padding-top: 130px; overflow-x: hidden; transition: background 0.3s; }
@@ -91,7 +91,7 @@
                     <button class="btn-action btn-like" onclick="likeVideo()">❤️ Like</button>
                     <button class="btn-action btn-share" onclick="shareVideo()">🔗 Share</button>
                     <button class="btn-action btn-fullscreen" onclick="goFullscreen()">🔲 Full Screen</button>
-                    <a href="https://your-adsterra-direct-link.com" target="_blank" class="btn-action" style="background:#25D366; color:#000;">⬇ Download HD</a>
+                    <a href="#" class="btn-action" style="background:#25D366; color:#000;">⬇ Download HD</a>
                 </div>
             </div>
         </div>
@@ -110,50 +110,59 @@
             isFetching = true;
             document.getElementById('loader').style.display = 'block';
 
-            try {
-                const safeQuery = encodeURIComponent(query);
-                
-                // NO PROXY NEEDED! Direct Redtube API (CORS Supported)
-                const targetUrl = `https://api.redtube.com/?data=redtube.Videos.searchVideos&search=${safeQuery}&page=${page}&output=json`;
+            const safeQuery = encodeURIComponent(query);
+            const targetUrl = `https://api.redtube.com/?data=redtube.Videos.searchVideos&search=${safeQuery}&page=${page}&output=json`;
 
-                const response = await fetch(targetUrl);
-                
-                if (!response.ok) {
-                     throw new Error('Failed to fetch from Redtube');
+            // Bulletproof Proxy List
+            const proxies = [
+                `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(targetUrl)}`,
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
+                `/api/proxy?url=${encodeURIComponent(targetUrl)}`
+            ];
+
+            let success = false;
+
+            for (let i = 0; i < proxies.length; i++) {
+                try {
+                    console.log("Trying proxy: " + (i+1));
+                    const response = await fetch(proxies[i]);
+                    if (response.ok) {
+                        const data = await response.json();
+                        
+                        if (data && data.videos && data.videos.length > 0) {
+                            const fetchedVids = data.videos.map(v => {
+                                const vid = v.video;
+                                let cleanUrl = `https://embed.redtube.com/?id=${vid.video_id}`; 
+                                const safeTitle = vid.title ? vid.title.replace(/['"]/g, "") : "Video";
+                                const safeThumb = vid.default_thumb || "";
+                                const videoDuration = vid.duration || "00:00";
+
+                                return {
+                                    id: vid.video_id,
+                                    title: safeTitle,
+                                    embedUrl: cleanUrl, 
+                                    thumb: safeThumb,
+                                    duration: videoDuration
+                                };
+                            });
+
+                            liveVideos = [...liveVideos, ...fetchedVids];
+                            renderGrid(liveVideos);
+                            success = true;
+                            break; // API successfully connected, stop loop
+                        }
+                    }
+                } catch (error) {
+                    console.error("Proxy " + (i+1) + " failed.");
                 }
-
-                const data = await response.json();
-
-                if (data && data.videos && data.videos.length > 0) {
-                    const fetchedVids = data.videos.map(v => {
-                        const vid = v.video;
-                        // Redtube embed link format
-                        let cleanUrl = `https://embed.redtube.com/?id=${vid.video_id}`; 
-                        const safeTitle = vid.title ? vid.title.replace(/['"]/g, "") : "Video";
-                        const safeThumb = vid.default_thumb || "";
-                        const videoDuration = vid.duration || "00:00";
-
-                        return {
-                            id: vid.video_id,
-                            title: safeTitle,
-                            embedUrl: cleanUrl, 
-                            thumb: safeThumb,
-                            duration: videoDuration
-                        };
-                    });
-
-                    liveVideos = [...liveVideos, ...fetchedVids];
-                    renderGrid(liveVideos);
-                } else {
-                    showToast("No videos found.");
-                }
-            } catch (error) {
-                console.error("Fetch Error:", error);
-                showToast("Connection Error. Please ensure VPN is ON.");
-            } finally {
-                isFetching = false;
-                document.getElementById('loader').style.display = 'none';
             }
+
+            if (!success) {
+                showToast("Connection Error. Please ensure VPN is ON and refresh.");
+            }
+
+            isFetching = false;
+            document.getElementById('loader').style.display = 'none';
         }
 
         function renderGrid(videos) {
