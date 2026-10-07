@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xtube Auto - Bulletproof API</title>
+    <title>Xtube Auto - Ultimate Engine</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: #fff; min-height: 100vh; padding-top: 130px; overflow-x: hidden; transition: background 0.3s; }
@@ -36,24 +36,45 @@
         .title { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         #theaterMode { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 2000; display: none; flex-direction: column; overflow-y: auto; scroll-behavior: smooth; }
-        .theater-header { display: flex; justify-content: space-between; padding: 15px 20px; background: #000; position: sticky; top: 0; z-index: 2001; border-bottom: 1px solid #333; }
-        .close-theater { background: transparent; border: none; color: #ff3366; font-size: 20px; cursor: pointer; }
+        .theater-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #000; position: sticky; top: 0; z-index: 2001; border-bottom: 1px solid #333; }
+        #theater-title { font-size: 16px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%; }
+        .close-theater { background: rgba(255, 51, 102, 0.2); border: 1px solid #ff3366; color: #ff3366; font-size: 16px; font-weight: bold; cursor: pointer; padding: 5px 15px; border-radius: 20px; transition: 0.3s; }
+        .close-theater:hover { background: #ff3366; color: #fff; }
+        
         .theater-content { width: 100%; max-width: 1000px; margin: 0 auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
         
         #theater-container { width: 100%; padding-bottom: 56.25%; position: relative; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid #333; }
         #theater-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; background: #000; }
         
+        /* Fullscreen modifications */
+        #theater-container.fullscreen-active { padding-bottom: 0; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; border-radius: 0; border: none; }
+        
         .action-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px; flex-wrap: wrap; gap: 10px; }
-        .action-buttons { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-        .btn-action { background: #25D366; color: #000; border: none; padding: 10px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; text-decoration: none; transition: 0.2s; display: flex; align-items: center; gap: 5px; }
-        .btn-like { background: #ff3366; color: #fff; }
-        .btn-share { background: #0088cc; color: #fff; }
+        .action-buttons { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; width: 100%; justify-content: space-between; }
+        .btn-action { flex: 1; text-align: center; background: #333; color: #fff; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; text-decoration: none; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .btn-like { background: #ff3366; }
+        .btn-share { background: #0088cc; }
         .btn-fullscreen { background: #fff; color: #000; }
+        .btn-download { background: #25D366; color: #000; }
+
+        /* Suggestions Section */
+        .suggestions-title { margin-top: 20px; font-size: 18px; font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .suggestions-list { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+        .suggestion-item { display: flex; gap: 15px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.3s; align-items: center; }
+        .suggestion-item:hover { background: rgba(255,255,255,0.1); }
+        .sugg-thumb { width: 120px; height: 68px; border-radius: 4px; object-fit: cover; background: #000; }
+        .sugg-info { flex: 1; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
+        .sugg-title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 5px; }
+        .sugg-duration { font-size: 11px; color: #aaa; }
         
         .loader { text-align: center; padding: 20px; color: #ff3366; font-weight: bold; font-size: 18px; display: none; width: 100%; }
         
         #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 8px; padding: 12px; position: fixed; z-index: 10000; left: 50%; bottom: 30px; transform: translateX(-50%); border: 1px solid #ff3366; opacity: 0; transition: 0.3s; }
         #toast.show { visibility: visible; opacity: 1; bottom: 50px; }
+
+        @media (max-width: 600px) {
+            .btn-action { padding: 8px; font-size: 12px; }
+        }
     </style>
 </head>
 <body>
@@ -71,6 +92,8 @@
             <div class="cat-tag" onclick="loadCategory('amateur')">Amateur</div>
             <div class="cat-tag" onclick="loadCategory('asian')">Asian</div>
             <div class="cat-tag" onclick="loadCategory('teen')">Teen</div>
+            <div class="cat-tag" onclick="loadCategory('milf')">Milf</div>
+            <div class="cat-tag" onclick="loadCategory('lesbian')">Lesbian</div>
         </div>
     </div>
 
@@ -79,20 +102,25 @@
 
     <div id="theaterMode">
         <div class="theater-header">
-            <h3 id="theater-title" style="color: #fff;">Player</h3>
+            <h3 id="theater-title">Loading...</h3>
             <button class="close-theater" onclick="closeTheater()">✖ Close</button>
         </div>
         <div class="theater-content">
             <div id="theater-container"></div>
             
             <div class="action-bar" id="dynamic-action-bar">
-                <div style="color: #ff3366; font-weight: bold;">🔴 <span id="liveViewers">420</span> watching</div>
+                <div style="color: #ff3366; font-weight: bold; width: 100%; margin-bottom: 10px;">🔴 <span id="liveViewers">420</span> watching</div>
                 <div class="action-buttons">
                     <button class="btn-action btn-like" onclick="likeVideo()">❤️ Like</button>
                     <button class="btn-action btn-share" onclick="shareVideo()">🔗 Share</button>
                     <button class="btn-action btn-fullscreen" onclick="goFullscreen()">🔲 Full Screen</button>
-                    <a href="#" class="btn-action" style="background:#25D366; color:#000;">⬇ Download HD</a>
+                    <a href="https://your-adsterra-direct-link.com" target="_blank" class="btn-action btn-download">⬇ Download</a>
                 </div>
+            </div>
+
+            <div class="suggestions-title">Up Next</div>
+            <div class="suggestions-list" id="suggestions-list">
+                <!-- Suggestions will load here -->
             </div>
         </div>
     </div>
@@ -105,15 +133,16 @@
         let currentQuery = "hd"; 
         let isFetching = false;
 
-        async function fetchVideosFromAPI(query, page) {
-            if (isFetching) return;
-            isFetching = true;
-            document.getElementById('loader').style.display = 'block';
+        async function fetchVideosFromAPI(query, page, isSuggestion = false) {
+            if (isFetching && !isSuggestion) return;
+            if(!isSuggestion) {
+                isFetching = true;
+                document.getElementById('loader').style.display = 'block';
+            }
 
             const safeQuery = encodeURIComponent(query);
             const targetUrl = `https://api.redtube.com/?data=redtube.Videos.searchVideos&search=${safeQuery}&page=${page}&output=json`;
 
-            // Bulletproof Proxy List
             const proxies = [
                 `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(targetUrl)}`,
                 `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
@@ -121,48 +150,50 @@
             ];
 
             let success = false;
+            let resultData = null;
 
             for (let i = 0; i < proxies.length; i++) {
                 try {
-                    console.log("Trying proxy: " + (i+1));
                     const response = await fetch(proxies[i]);
                     if (response.ok) {
                         const data = await response.json();
-                        
                         if (data && data.videos && data.videos.length > 0) {
-                            const fetchedVids = data.videos.map(v => {
-                                const vid = v.video;
-                                let cleanUrl = `https://embed.redtube.com/?id=${vid.video_id}`; 
-                                const safeTitle = vid.title ? vid.title.replace(/['"]/g, "") : "Video";
-                                const safeThumb = vid.default_thumb || "";
-                                const videoDuration = vid.duration || "00:00";
-
-                                return {
-                                    id: vid.video_id,
-                                    title: safeTitle,
-                                    embedUrl: cleanUrl, 
-                                    thumb: safeThumb,
-                                    duration: videoDuration
-                                };
-                            });
-
-                            liveVideos = [...liveVideos, ...fetchedVids];
-                            renderGrid(liveVideos);
+                            resultData = data.videos;
                             success = true;
-                            break; // API successfully connected, stop loop
+                            break;
                         }
                     }
                 } catch (error) {
-                    console.error("Proxy " + (i+1) + " failed.");
+                    console.error("Proxy fail");
                 }
             }
 
-            if (!success) {
+            if (success && resultData) {
+                const fetchedVids = resultData.map(v => {
+                    const vid = v.video;
+                    return {
+                        id: vid.video_id,
+                        title: vid.title ? vid.title.replace(/['"]/g, "") : "Video",
+                        embedUrl: `https://embed.redtube.com/?id=${vid.video_id}&autoplay=1`, 
+                        thumb: vid.default_thumb || "",
+                        duration: vid.duration || "00:00"
+                    };
+                });
+
+                if (isSuggestion) {
+                    renderSuggestions(fetchedVids);
+                } else {
+                    liveVideos = [...liveVideos, ...fetchedVids];
+                    renderGrid(liveVideos);
+                }
+            } else if (!isSuggestion) {
                 showToast("Connection Error. Please ensure VPN is ON and refresh.");
             }
 
-            isFetching = false;
-            document.getElementById('loader').style.display = 'none';
+            if(!isSuggestion) {
+                isFetching = false;
+                document.getElementById('loader').style.display = 'none';
+            }
         }
 
         function renderGrid(videos) {
@@ -178,6 +209,26 @@
                             <div class="video-duration">⏱ ${vid.duration}</div>
                         </div>
                         <div class="info"><div class="title">${vid.title}</div></div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderSuggestions(videos) {
+            const list = document.getElementById('suggestions-list');
+            list.innerHTML = '';
+            
+            // Limit to 6 suggestions
+            const suggVideos = videos.slice(0, 6);
+            
+            suggVideos.forEach(vid => {
+                list.innerHTML += `
+                    <div class="suggestion-item" onclick="openTheater('${vid.id}', '${vid.embedUrl}', '${vid.title}')">
+                        <img class="sugg-thumb" src="${vid.thumb}" loading="lazy" alt="thumb">
+                        <div class="sugg-info">
+                            <div class="sugg-title">${vid.title}</div>
+                            <div class="sugg-duration">⏱ ${vid.duration}</div>
+                        </div>
                     </div>
                 `;
             });
@@ -207,6 +258,8 @@
         }
 
         window.addEventListener('scroll', () => {
+            if (document.getElementById('theaterMode').style.display === 'flex') return;
+            
             if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 800) {
                 if (!isFetching) {
                     currentPage++;
@@ -216,6 +269,9 @@
         });
 
         function openTheater(id, url, title) {
+            // Scroll to top
+            document.getElementById('theaterMode').scrollTo(0,0);
+            
             document.getElementById('theater-title').textContent = title;
             document.getElementById('theaterMode').style.display = 'flex';
             
@@ -224,16 +280,74 @@
             `;
             
             document.getElementById('liveViewers').innerText = Math.floor(Math.random() * 800) + 200;
+            
+            // Load Suggestions (fetching page 2 of current query to get different videos)
+            document.getElementById('suggestions-list').innerHTML = '<div style="text-align:center; padding: 20px; color: #888;">Loading suggestions...</div>';
+            fetchVideosFromAPI(currentQuery, Math.floor(Math.random() * 5) + 1, true);
         }
 
         function closeTheater() {
             document.getElementById('theaterMode').style.display = 'none';
             document.getElementById('theater-container').innerHTML = '';
+            
+            // Exit fullscreen if active
+            if (document.fullscreenElement) {
+                document.exitFullscreen().catch(err => console.log(err));
+            }
+            // Unlock screen orientation if active
+            if (screen.orientation && screen.orientation.unlock) {
+                screen.orientation.unlock();
+            }
         }
 
         function goFullscreen() {
-            const player = document.getElementById('main-video-frame');
-            if (player && player.requestFullscreen) player.requestFullscreen();
+            const container = document.getElementById('theater-container');
+            const iframe = document.getElementById('main-video-frame');
+            
+            if (!document.fullscreenElement) {
+                // Request Fullscreen on container (not just iframe) for better mobile support
+                if (container.requestFullscreen) {
+                    container.requestFullscreen();
+                } else if (container.webkitRequestFullscreen) {
+                    container.webkitRequestFullscreen();
+                } else if (container.msRequestFullscreen) {
+                    container.msRequestFullscreen();
+                }
+                
+                // Force Landscape mode on mobile
+                if (screen.orientation && screen.orientation.lock) {
+                    screen.orientation.lock("landscape").catch(function(error) {
+                        console.log("Orientation lock failed: " + error);
+                    });
+                }
+                
+                container.classList.add('fullscreen-active');
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+                
+                if (screen.orientation && screen.orientation.unlock) {
+                    screen.orientation.unlock();
+                }
+                
+                container.classList.remove('fullscreen-active');
+            }
+        }
+        
+        // Listen for fullscreen exit via hardware back button or ESC key
+        document.addEventListener('fullscreenchange', exitHandler);
+        document.addEventListener('webkitfullscreenchange', exitHandler);
+        document.addEventListener('mozfullscreenchange', exitHandler);
+        document.addEventListener('MSFullscreenChange', exitHandler);
+
+        function exitHandler() {
+            if (!document.fullscreenElement && !document.webkitIsFullScreen && !document.mozFullScreen && !document.msFullscreenElement) {
+                document.getElementById('theater-container').classList.remove('fullscreen-active');
+                if (screen.orientation && screen.orientation.unlock) {
+                    screen.orientation.unlock();
+                }
+            }
         }
 
         function likeVideo() {
