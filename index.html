@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xtube Auto - Ultimate Engine</title>
+    <title>Xtube Auto - Working Redtube Engine</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: #fff; min-height: 100vh; padding-top: 130px; overflow-x: hidden; transition: background 0.3s; }
@@ -46,7 +46,6 @@
         #theater-container { width: 100%; padding-bottom: 56.25%; position: relative; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid #333; }
         #theater-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; background: #000; }
         
-        /* Fullscreen modifications */
         #theater-container.fullscreen-active { padding-bottom: 0; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; border-radius: 0; border: none; }
         
         .action-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px; flex-wrap: wrap; gap: 10px; }
@@ -57,7 +56,6 @@
         .btn-fullscreen { background: #fff; color: #000; }
         .btn-download { background: #25D366; color: #000; }
 
-        /* Suggestions Section */
         .suggestions-title { margin-top: 20px; font-size: 18px; font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 10px; }
         .suggestions-list { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
         .suggestion-item { display: flex; gap: 15px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.3s; align-items: center; }
@@ -98,7 +96,7 @@
     </div>
 
     <div class="grid" id="video-grid"></div>
-    <div class="loader" id="loader">Fetching Videos... 🚀</div>
+    <div class="loader" id="loader">Loading... 🚀</div>
 
     <div id="theaterMode">
         <div class="theater-header">
@@ -119,9 +117,7 @@
             </div>
 
             <div class="suggestions-title">Up Next</div>
-            <div class="suggestions-list" id="suggestions-list">
-                <!-- Suggestions will load here -->
-            </div>
+            <div class="suggestions-list" id="suggestions-list"></div>
         </div>
     </div>
 
@@ -143,63 +139,47 @@
             const safeQuery = encodeURIComponent(query);
             const targetUrl = `https://api.redtube.com/?data=redtube.Videos.searchVideos&search=${safeQuery}&page=${page}&output=json`;
 
-            const proxies = [
-                `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(targetUrl)}`,
-                `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
-                `/api/proxy?url=${encodeURIComponent(targetUrl)}`
-            ];
+            // FAST WORKING PROXY FOR REDTUBE
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
 
-            let success = false;
-            let resultData = null;
+            try {
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error();
 
-            for (let i = 0; i < proxies.length; i++) {
-                try {
-                    const response = await fetch(proxies[i]);
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data && data.videos && data.videos.length > 0) {
-                            resultData = data.videos;
-                            success = true;
-                            break;
-                        }
+                const data = await response.json();
+                
+                if (data && data.videos && data.videos.length > 0) {
+                    const fetchedVids = data.videos.map(v => {
+                        const vid = v.video;
+                        return {
+                            id: vid.video_id,
+                            title: vid.title ? vid.title.replace(/['"]/g, "") : "Video",
+                            embedUrl: `https://embed.redtube.com/?id=${vid.video_id}`, 
+                            thumb: vid.default_thumb || "",
+                            duration: vid.duration || "00:00"
+                        };
+                    });
+
+                    if (isSuggestion) {
+                        renderSuggestions(fetchedVids);
+                    } else {
+                        liveVideos = [...liveVideos, ...fetchedVids];
+                        renderGrid(liveVideos);
                     }
-                } catch (error) {
-                    console.error("Proxy fail");
                 }
-            }
-
-            if (success && resultData) {
-                const fetchedVids = resultData.map(v => {
-                    const vid = v.video;
-                    return {
-                        id: vid.video_id,
-                        title: vid.title ? vid.title.replace(/['"]/g, "") : "Video",
-                        embedUrl: `https://embed.redtube.com/?id=${vid.video_id}&autoplay=1`, 
-                        thumb: vid.default_thumb || "",
-                        duration: vid.duration || "00:00"
-                    };
-                });
-
-                if (isSuggestion) {
-                    renderSuggestions(fetchedVids);
-                } else {
-                    liveVideos = [...liveVideos, ...fetchedVids];
-                    renderGrid(liveVideos);
+            } catch (error) {
+                if (!isSuggestion) showToast("Connection error. Please check VPN.");
+            } finally {
+                if(!isSuggestion) {
+                    isFetching = false;
+                    document.getElementById('loader').style.display = 'none';
                 }
-            } else if (!isSuggestion) {
-                showToast("Connection Error. Please ensure VPN is ON and refresh.");
-            }
-
-            if(!isSuggestion) {
-                isFetching = false;
-                document.getElementById('loader').style.display = 'none';
             }
         }
 
         function renderGrid(videos) {
             const grid = document.getElementById('video-grid');
             grid.innerHTML = '';
-            
             videos.forEach(vid => {
                 grid.innerHTML += `
                     <div class="card" onclick="openTheater('${vid.id}', '${vid.embedUrl}', '${vid.title}')">
@@ -217,10 +197,7 @@
         function renderSuggestions(videos) {
             const list = document.getElementById('suggestions-list');
             list.innerHTML = '';
-            
-            // Limit to 6 suggestions
             const suggVideos = videos.slice(0, 6);
-            
             suggVideos.forEach(vid => {
                 list.innerHTML += `
                     <div class="suggestion-item" onclick="openTheater('${vid.id}', '${vid.embedUrl}', '${vid.title}')">
@@ -259,7 +236,6 @@
 
         window.addEventListener('scroll', () => {
             if (document.getElementById('theaterMode').style.display === 'flex') return;
-            
             if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 800) {
                 if (!isFetching) {
                     currentPage++;
@@ -269,91 +245,57 @@
         });
 
         function openTheater(id, url, title) {
-            // Scroll to top
             document.getElementById('theaterMode').scrollTo(0,0);
-            
             document.getElementById('theater-title').textContent = title;
             document.getElementById('theaterMode').style.display = 'flex';
             
             document.getElementById('theater-container').innerHTML = `
-                <iframe id="main-video-frame" src="${url}" frameborder="0" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="autoplay; fullscreen"></iframe>
+                <iframe id="main-video-frame" src="${url}" frameborder="0" scrolling="no" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="fullscreen"></iframe>
             `;
             
             document.getElementById('liveViewers').innerText = Math.floor(Math.random() * 800) + 200;
+            document.getElementById('suggestions-list').innerHTML = '<div style="text-align:center; padding: 20px; color: #888;">Loading...</div>';
             
-            // Load Suggestions (fetching page 2 of current query to get different videos)
-            document.getElementById('suggestions-list').innerHTML = '<div style="text-align:center; padding: 20px; color: #888;">Loading suggestions...</div>';
-            fetchVideosFromAPI(currentQuery, Math.floor(Math.random() * 5) + 1, true);
+            // Fast instant suggestion load
+            fetchVideosFromAPI(currentQuery, Math.floor(Math.random() * 3) + 1, true);
         }
 
         function closeTheater() {
             document.getElementById('theaterMode').style.display = 'none';
             document.getElementById('theater-container').innerHTML = '';
             
-            // Exit fullscreen if active
-            if (document.fullscreenElement) {
-                document.exitFullscreen().catch(err => console.log(err));
-            }
-            // Unlock screen orientation if active
-            if (screen.orientation && screen.orientation.unlock) {
-                screen.orientation.unlock();
-            }
+            if (document.fullscreenElement) document.exitFullscreen().catch(e => {});
+            if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
         }
 
         function goFullscreen() {
             const container = document.getElementById('theater-container');
-            const iframe = document.getElementById('main-video-frame');
-            
             if (!document.fullscreenElement) {
-                // Request Fullscreen on container (not just iframe) for better mobile support
-                if (container.requestFullscreen) {
-                    container.requestFullscreen();
-                } else if (container.webkitRequestFullscreen) {
-                    container.webkitRequestFullscreen();
-                } else if (container.msRequestFullscreen) {
-                    container.msRequestFullscreen();
-                }
+                if (container.requestFullscreen) container.requestFullscreen();
+                else if (container.webkitRequestFullscreen) container.webkitRequestFullscreen();
                 
-                // Force Landscape mode on mobile
                 if (screen.orientation && screen.orientation.lock) {
-                    screen.orientation.lock("landscape").catch(function(error) {
-                        console.log("Orientation lock failed: " + error);
-                    });
+                    screen.orientation.lock("landscape").catch(e => {});
                 }
-                
                 container.classList.add('fullscreen-active');
             } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                }
-                
-                if (screen.orientation && screen.orientation.unlock) {
-                    screen.orientation.unlock();
-                }
-                
+                if (document.exitFullscreen) document.exitFullscreen();
+                if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
                 container.classList.remove('fullscreen-active');
             }
         }
         
-        // Listen for fullscreen exit via hardware back button or ESC key
         document.addEventListener('fullscreenchange', exitHandler);
         document.addEventListener('webkitfullscreenchange', exitHandler);
-        document.addEventListener('mozfullscreenchange', exitHandler);
-        document.addEventListener('MSFullscreenChange', exitHandler);
 
         function exitHandler() {
-            if (!document.fullscreenElement && !document.webkitIsFullScreen && !document.mozFullScreen && !document.msFullscreenElement) {
+            if (!document.fullscreenElement && !document.webkitIsFullScreen) {
                 document.getElementById('theater-container').classList.remove('fullscreen-active');
-                if (screen.orientation && screen.orientation.unlock) {
-                    screen.orientation.unlock();
-                }
+                if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
             }
         }
 
-        function likeVideo() {
-            showToast("❤️ Added to Favorites!");
-        }
-
+        function likeVideo() { showToast("❤️ Added to Favorites!"); }
         function shareVideo() {
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(window.location.href);
@@ -361,10 +303,7 @@
             }
         }
 
-        function toggleTheme() {
-            document.body.classList.toggle('dark-mode');
-        }
-
+        function toggleTheme() { document.body.classList.toggle('dark-mode'); }
         function showToast(msg) {
             const toast = document.getElementById("toast");
             toast.textContent = msg;
