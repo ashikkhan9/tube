@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xtube Premium - Direct Native API</title>
+    <title>Xtube Premium - Auto Proxy Rotator</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: #fff; min-height: 100vh; padding-top: 130px; overflow-x: hidden; transition: background 0.3s; }
@@ -73,7 +73,7 @@
     </div>
 
     <div class="grid" id="video-grid"></div>
-    <div class="loader" id="loader">Fetching Live Videos... 🚀</div>
+    <div class="loader" id="loader">Connecting to API... 🚀</div>
 
     <div id="theaterMode">
         <div class="theater-header">
@@ -102,52 +102,63 @@
         let currentPage = 1;
         let currentQuery = "hd"; 
         let isFetching = false;
-        let currentPlayingId = null;
 
         async function fetchVideosFromAPI(query, page) {
             if (isFetching) return;
             isFetching = true;
             document.getElementById('loader').style.display = 'block';
 
-            try {
-                const safeQuery = encodeURIComponent(query);
-                
-                // NO PROXY NEEDED: Using Direct Public API which natively supports cross-origin
-                const apiUrl = `https://api.redtube.com/?data=redtube.Videos.searchVideos&search=${safeQuery}&page=${page}&output=json`;
-                
-                const response = await fetch(apiUrl);
-                
-                if (!response.ok) {
-                    throw new Error('API Server Issue');
+            const safeQuery = encodeURIComponent(query);
+            // আমরা Eporner API তেই ফিরে যাচ্ছি কারণ এর ডাটাবেজ এবং প্লেয়ার সবচেয়ে স্টেবল
+            const epornerUrl = `https://www.eporner.com/api/v2/video/search/?query=${safeQuery}&per_page=30&page=${page}`;
+            
+            // PROXY ROTATOR: ৩টি আলাদা প্রক্সি, একটি ফেইল করলে আরেকটিতে ট্রাই করবে
+            const proxies = [
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(epornerUrl)}`,
+                `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(epornerUrl)}`,
+                `https://corsproxy.io/?${encodeURIComponent(epornerUrl)}`
+            ];
+
+            let success = false;
+            let data = null;
+
+            for (let proxy of proxies) {
+                try {
+                    const response = await fetch(proxy);
+                    if (response.ok) {
+                        data = await response.json();
+                        if (data && data.videos) {
+                            success = true;
+                            break; // ডেটা পেয়ে গেলে লুপ থেকে বের হয়ে যাবে
+                        }
+                    }
+                } catch (err) {
+                    console.log("Proxy failed, trying next...");
                 }
-
-                const data = await response.json();
-
-                if (data && data.videos && data.videos.length > 0) {
-                    const fetchedVids = data.videos.map(item => {
-                        const v = item.video;
-                        const safeTitle = v.title ? v.title.replace(/['"]/g, "") : "Video";
-                        
-                        return {
-                            id: v.video_id,
-                            title: safeTitle,
-                            embedUrl: v.embed_url, 
-                            thumb: v.default_thumb
-                        };
-                    });
-
-                    liveVideos = [...liveVideos, ...fetchedVids];
-                    renderGrid(liveVideos);
-                } else {
-                    showToast("No more videos found.");
-                }
-            } catch (error) {
-                console.error("Fetch Error:", error);
-                showToast("Network error, retrying...");
-            } finally {
-                isFetching = false;
-                document.getElementById('loader').style.display = 'none';
             }
+
+            if (success && data && data.videos) {
+                const fetchedVids = data.videos.map(v => {
+                    // ক্লিন এমবেড লিংক জেনারেট
+                    let cleanUrl = `https://www.eporner.com/embed/${v.id}/`; 
+                    const safeTitle = v.title ? v.title.replace(/['"]/g, "") : "Video";
+
+                    return {
+                        id: v.id,
+                        title: safeTitle,
+                        embedUrl: cleanUrl, 
+                        thumb: v.default_thumb ? v.default_thumb.src : ""
+                    };
+                });
+
+                liveVideos = [...liveVideos, ...fetchedVids];
+                renderGrid(liveVideos);
+            } else {
+                showToast("Network blocked. Please try again or use a VPN.");
+            }
+
+            isFetching = false;
+            document.getElementById('loader').style.display = 'none';
         }
 
         function renderGrid(videos) {
@@ -200,13 +211,11 @@
         });
 
         function openTheater(id, url, title) {
-            currentPlayingId = id;
             document.getElementById('theater-title').textContent = title;
             document.getElementById('theaterMode').style.display = 'flex';
             
-            // Clean simple iframe format for maximum compatibility
             document.getElementById('theater-container').innerHTML = `
-                <iframe id="main-video-frame" src="${url}" frameborder="0" width="100%" height="100%" scrolling="no" allowfullscreen allow="autoplay; fullscreen"></iframe>
+                <iframe id="main-video-frame" src="${url}" frameborder="0" width="100%" height="100%" scrolling="no" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="autoplay; fullscreen"></iframe>
             `;
             
             document.getElementById('liveViewers').innerText = Math.floor(Math.random() * 800) + 200;
