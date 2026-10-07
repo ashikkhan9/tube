@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xtube Premium - Cloudflare Bypass</title>
+    <title>Xtube Premium - Stable Engine</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: #fff; min-height: 100vh; padding-top: 130px; overflow-x: hidden; transition: background 0.3s; }
@@ -75,7 +75,7 @@
     </div>
 
     <div class="grid" id="video-grid"></div>
-    <div class="loader" id="loader">Bypassing ISP Block... 🚀</div>
+    <div class="loader" id="loader">Fetching Videos... 🚀</div>
 
     <div id="theaterMode">
         <div class="theater-header">
@@ -91,7 +91,7 @@
                     <button class="btn-action btn-like" onclick="likeVideo()">❤️ Like</button>
                     <button class="btn-action btn-share" onclick="shareVideo()">🔗 Share</button>
                     <button class="btn-action btn-fullscreen" onclick="goFullscreen()">🔲 Full Screen</button>
-                    <a href="#" class="btn-action" style="background:#25D366; color:#000;">⬇ Download HD</a>
+                    <a href="https://your-adsterra-direct-link.com" target="_blank" class="btn-action" style="background:#25D366; color:#000;">⬇ Download HD</a>
                 </div>
             </div>
         </div>
@@ -105,13 +105,6 @@
         let currentQuery = "hd"; 
         let isFetching = false;
 
-        function formatDuration(seconds) {
-            if (!seconds) return "00:00";
-            let mins = Math.floor(seconds / 60);
-            let secs = Math.floor(seconds % 60);
-            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-        }
-
         async function fetchVideosFromAPI(query, page) {
             if (isFetching) return;
             isFetching = true;
@@ -119,28 +112,29 @@
 
             try {
                 const safeQuery = encodeURIComponent(query);
-                const targetUrl = `https://www.eporner.com/api/v2/video/search/?query=${safeQuery}&per_page=30&page=${page}`;
                 
-                // Magic Line: ETA CLOUDFLARE WORKER USE KORBE (/api/proxy)
-                const proxyUrl = `/api/proxy?url=${encodeURIComponent(targetUrl)}`;
+                // NO PROXY NEEDED! Direct Redtube API (CORS Supported)
+                const targetUrl = `https://api.redtube.com/?data=redtube.Videos.searchVideos&search=${safeQuery}&page=${page}&output=json`;
 
-                const response = await fetch(proxyUrl);
+                const response = await fetch(targetUrl);
                 
                 if (!response.ok) {
-                     throw new Error('Proxy failed to fetch');
+                     throw new Error('Failed to fetch from Redtube');
                 }
 
                 const data = await response.json();
 
-                if (data && data.videos) {
+                if (data && data.videos && data.videos.length > 0) {
                     const fetchedVids = data.videos.map(v => {
-                        let cleanUrl = `https://www.eporner.com/embed/${v.id}/`; 
-                        const safeTitle = v.title ? v.title.replace(/['"]/g, "") : "Video";
-                        const safeThumb = (v.default_thumb && v.default_thumb.src) ? v.default_thumb.src : "";
-                        const videoDuration = formatDuration(v.length_sec);
+                        const vid = v.video;
+                        // Redtube embed link format
+                        let cleanUrl = `https://embed.redtube.com/?id=${vid.video_id}`; 
+                        const safeTitle = vid.title ? vid.title.replace(/['"]/g, "") : "Video";
+                        const safeThumb = vid.default_thumb || "";
+                        const videoDuration = vid.duration || "00:00";
 
                         return {
-                            id: v.id,
+                            id: vid.video_id,
                             title: safeTitle,
                             embedUrl: cleanUrl, 
                             thumb: safeThumb,
@@ -155,7 +149,7 @@
                 }
             } catch (error) {
                 console.error("Fetch Error:", error);
-                showToast("Connection Error. Please check your network.");
+                showToast("Connection Error. Please ensure VPN is ON.");
             } finally {
                 isFetching = false;
                 document.getElementById('loader').style.display = 'none';
