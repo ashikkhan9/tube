@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xtube Auto - Superfast Engine</title>
+    <title>Xtube Auto - Original Stable Player</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: #fff; min-height: 100vh; padding-top: 130px; overflow-x: hidden; transition: background 0.3s; }
@@ -46,7 +46,7 @@
         #theater-container { width: 100%; padding-bottom: 56.25%; position: relative; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid #333; }
         #theater-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; background: #000; }
         
-        /* Fullscreen modifications */
+        /* Fullscreen CSS without altering iframe attributes */
         #theater-container.fullscreen-active { padding-bottom: 0 !important; position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 9999 !important; border-radius: 0 !important; border: none !important; background: #000; }
         #theater-container.fullscreen-active iframe { width: 100vw !important; height: 100vh !important; }
         
@@ -58,7 +58,6 @@
         .btn-fullscreen { background: #fff; color: #000; }
         .btn-download { background: #25D366; color: #000; }
 
-        /* Suggestions Section */
         .suggestions-title { margin-top: 20px; font-size: 18px; font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 10px; }
         .suggestions-list { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
         .suggestion-item { display: flex; gap: 15px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.3s; align-items: center; }
@@ -99,7 +98,7 @@
     </div>
 
     <div class="grid" id="video-grid"></div>
-    <div class="loader" id="loader">Fetching... 🚀</div>
+    <div class="loader" id="loader">Loading... 🚀</div>
 
     <div id="theaterMode">
         <div class="theater-header">
@@ -132,13 +131,6 @@
         let currentQuery = "hd"; 
         let isFetching = false;
 
-        function formatDuration(seconds) {
-            if (!seconds) return "00:00";
-            let mins = Math.floor(seconds / 60);
-            let secs = Math.floor(seconds % 60);
-            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-        }
-
         async function fetchVideosFromAPI(query, page, isSuggestion = false) {
             if (isFetching && !isSuggestion) return;
             if(!isSuggestion) {
@@ -147,54 +139,53 @@
             }
 
             const safeQuery = encodeURIComponent(query);
-            
-            // EPORNER API IS BACK!
-            const targetUrl = `https://www.eporner.com/api/v2/video/search/?query=${safeQuery}&per_page=30&page=${page}`;
+            const targetUrl = `https://api.redtube.com/?data=redtube.Videos.searchVideos&search=${safeQuery}&page=${page}&output=json`;
 
-            // 3-Proxy Fast Loop to bypass ISP block (VPN not needed for fetching)
             const proxies = [
-                `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(targetUrl)}`,
-                `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
-                `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
+                `/api/proxy?url=${encodeURIComponent(targetUrl)}`,
+                `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(targetUrl)}`
             ];
 
-            try {
-                // Fastest proxy wins! No waiting.
-                const fetchPromises = proxies.map(p => fetch(p).then(res => {
-                    if (!res.ok) throw new Error();
-                    return res.json();
-                }));
+            let data = null;
 
-                const data = await Promise.any(fetchPromises);
-                
-                if (data && data.videos && data.videos.length > 0) {
-                    const fetchedVids = data.videos.map(v => {
-                        return {
-                            id: v.id,
-                            title: v.title ? v.title.replace(/['"]/g, "") : "Video",
-                            // Perfect working Eporner iframe
-                            embedUrl: `https://www.eporner.com/embed/${v.id}/`, 
-                            thumb: v.default_thumb ? v.default_thumb.src : "",
-                            duration: formatDuration(v.length_sec)
-                        };
-                    });
-
-                    if (isSuggestion) {
-                        renderSuggestions(fetchedVids);
-                    } else {
-                        liveVideos = [...liveVideos, ...fetchedVids];
-                        renderGrid(liveVideos);
+            for(let proxy of proxies) {
+                try {
+                    let res = await fetch(proxy);
+                    if(res.ok) {
+                        data = await res.json();
+                        if(data && data.videos) break; 
                     }
+                } catch(e) {
+                    continue;
+                }
+            }
+
+            if (data && data.videos && data.videos.length > 0) {
+                const fetchedVids = data.videos.map(v => {
+                    const vid = v.video;
+                    return {
+                        id: vid.video_id,
+                        title: vid.title ? vid.title.replace(/['"]/g, "") : "Video",
+                        embedUrl: `https://embed.redtube.com/?id=${vid.video_id}`, 
+                        thumb: vid.default_thumb || "",
+                        duration: vid.duration || "00:00"
+                    };
+                });
+
+                if (isSuggestion) {
+                    renderSuggestions(fetchedVids);
                 } else {
-                    if(!isSuggestion) showToast("No videos found.");
+                    liveVideos = [...liveVideos, ...fetchedVids];
+                    renderGrid(liveVideos);
                 }
-            } catch (error) {
-                if (!isSuggestion) showToast("Connection Error. Please refresh.");
-            } finally {
-                if(!isSuggestion) {
-                    isFetching = false;
-                    document.getElementById('loader').style.display = 'none';
-                }
+            } else {
+                if(!isSuggestion) showToast("Connection Error. Please check VPN.");
+            }
+
+            if(!isSuggestion) {
+                isFetching = false;
+                document.getElementById('loader').style.display = 'none';
             }
         }
 
@@ -270,9 +261,9 @@
             document.getElementById('theater-title').textContent = title;
             document.getElementById('theaterMode').style.display = 'flex';
             
-            // iframe rendering
+            // EXACT SAME IFRAME THAT WORKED EARLIER (NO CHANGES)
             document.getElementById('theater-container').innerHTML = `
-                <iframe id="main-video-frame" src="${url}" frameborder="0" scrolling="no" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
+                <iframe id="main-video-frame" src="${url}" frameborder="0" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="autoplay; fullscreen"></iframe>
             `;
             
             document.getElementById('liveViewers').innerText = Math.floor(Math.random() * 800) + 200;
@@ -285,12 +276,15 @@
             document.getElementById('theaterMode').style.display = 'none';
             document.getElementById('theater-container').innerHTML = '';
             
-            if (document.fullscreenElement) document.exitFullscreen().catch(e => {});
-            if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
+            if (document.fullscreenElement) {
+                document.exitFullscreen().catch(e => console.log(e));
+            }
+            if (screen.orientation && screen.orientation.unlock) {
+                screen.orientation.unlock();
+            }
             document.getElementById('theater-container').classList.remove('fullscreen-active');
         }
 
-        // Fullscreen Logic
         function goFullscreen() {
             const container = document.getElementById('theater-container');
             if (!document.fullscreenElement && !document.webkitIsFullScreen) {
