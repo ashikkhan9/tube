@@ -41,7 +41,8 @@
         .close-theater { background: rgba(255, 51, 102, 0.2); border: 1px solid #ff3366; color: #ff3366; font-size: 16px; font-weight: bold; cursor: pointer; padding: 5px 15px; border-radius: 20px; transition: 0.3s; }
         .close-theater:hover { background: #ff3366; color: #fff; }
         
-        .theater-content { width: 100%; max-width: 1000px; margin: 0 auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        /* Fixed extra layer issue with clean professional padding */
+        .theater-content { width: 100%; max-width: 1000px; margin: 0 auto; padding: 20px 20px 40px 20px; display: flex; flex-direction: column; gap: 15px; }
         
         #theater-container { width: 100%; padding-bottom: 56.25%; position: relative; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid #333; }
         #theater-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; background: #000; }
@@ -58,7 +59,7 @@
         .btn-download { background: #25D366; color: #000; }
 
         .suggestions-title { margin-top: 20px; font-size: 18px; font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .suggestions-list { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+        .suggestions-list { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; margin-bottom: 0; }
         .suggestion-item { display: flex; gap: 15px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.3s; align-items: center; }
         .suggestion-item:hover { background: rgba(255,255,255,0.1); }
         .sugg-thumb { width: 120px; height: 68px; border-radius: 4px; object-fit: cover; background: #000; }
@@ -138,8 +139,6 @@
             }
 
             const safeQuery = encodeURIComponent(query);
-            
-            // Thumbzilla/MindGeek Official Master API (Highly Stable JSON Feed)
             const targetUrl = `https://www.pornhub.com/webmasters/search?search=${safeQuery}&page=${page}`;
 
             const proxies = [
@@ -164,12 +163,11 @@
 
             if (data && data.videos && data.videos.length > 0) {
                 const fetchedVids = data.videos.map(v => {
-                    const vid = v.video || v; // Handle flexible JSON structure
+                    const vid = v.video || v; 
                     const vId = vid.video_id || vid.id;
                     return {
                         id: vId,
                         title: vid.title ? vid.title.replace(/['"]/g, "") : "Video",
-                        // MindGeek Master Embed Player (Never gets sad face block)
                         embedUrl: vid.embed || `https://www.pornhub.com/embed/${vId}`, 
                         thumb: vid.default_thumb || "",
                         duration: vid.duration || "00:00"
@@ -264,7 +262,6 @@
             document.getElementById('theater-title').textContent = title;
             document.getElementById('theaterMode').style.display = 'flex';
             
-            // Basic secure iframe, no extra attributes that trigger blocks
             document.getElementById('theater-container').innerHTML = `
                 <iframe id="main-video-frame" src="${url}" frameborder="0" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
             `;
@@ -279,7 +276,7 @@
             document.getElementById('theaterMode').style.display = 'none';
             document.getElementById('theater-container').innerHTML = '';
             
-            if (document.fullscreenElement) document.exitFullscreen().catch(e => console.log(e));
+            if (document.fullscreenElement) document.exitFullscreen().catch(e => {});
             if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
             
             document.getElementById('theater-container').classList.remove('fullscreen-active');
