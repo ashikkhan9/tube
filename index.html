@@ -7,6 +7,7 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         
+        /* Custom Premium Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #0f0c29; }
         ::-webkit-scrollbar-thumb { background: rgba(255, 51, 102, 0.5); border-radius: 10px; }
@@ -17,6 +18,7 @@
         body.dark-mode { background: #050505; }
         body.dark-mode nav, body.dark-mode .sub-nav, body.dark-mode .card, body.dark-mode .action-bar { background: rgba(15, 15, 15, 0.9); border-color: #222; }
         
+        /* Premium Navbar */
         nav { position: fixed; top: 0; left: 0; width: 100%; height: 75px; background: rgba(15, 12, 41, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; padding: 0 25px; z-index: 1000; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5); transition: 0.3s; }
         .logo { font-size: 26px; font-weight: 800; background: linear-gradient(45deg, #ff3366, #ff9933); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; }
         .nav-right { display: flex; align-items: center; gap: 15px; position: relative; }
@@ -24,6 +26,7 @@
         .search-bar { width: 100%; max-width: 220px; padding: 10px 18px; border-radius: 25px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); color: #fff; outline: none; transition: 0.3s; font-size: 14px; }
         .search-bar:focus { background: rgba(255,255,255,0.15); border-color: #ff3366; box-shadow: 0 0 15px rgba(255,51,102,0.3); }
         
+        /* Trending Search Box */
         .trending-box { display: none; position: absolute; top: 55px; right: 50px; width: 220px; background: rgba(15,15,15,0.95); backdrop-filter: blur(15px); border: 1px solid rgba(255,51,102,0.3); border-radius: 12px; padding: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); z-index: 1001; }
         .trend-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
         .trend-tags span { background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 15px; font-size: 12px; cursor: pointer; transition: 0.3s; color: #fff; font-weight: 600; }
@@ -32,14 +35,16 @@
         .theme-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; font-size: 16px; transition: 0.3s; display: flex; align-items: center; justify-content: center; }
         .theme-btn:hover { background: rgba(255,255,255,0.2); transform: rotate(15deg); }
         
+        /* Premium Subnav */
         .sub-nav { position: fixed; top: 75px; left: 0; width: 100%; height: 55px; background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 999; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: 0.3s; }
         .categories { display: flex; gap: 12px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; padding: 5px 0; }
         .categories::-webkit-scrollbar { display: none; }
         .cat-tag { background: rgba(255,255,255,0.05); padding: 8px 18px; border-radius: 25px; cursor: pointer; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 0.5px; }
         .cat-tag.active, .cat-tag:hover { background: linear-gradient(45deg, #ff3366, #ff0044); border-color: transparent; box-shadow: 0 5px 15px rgba(255,51,102,0.4); transform: translateY(-2px); }
 
+        /* Premium Grid & Cards */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; max-width: 1300px; margin: 0 auto 30px; padding: 0 20px; }
-        .card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer; position: relative; z-index: 10; }
+        .card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer; position: relative; }
         .card:hover { transform: translateY(-8px) scale(1.02); border-color: rgba(255,51,102,0.4); box-shadow: 0 15px 40px rgba(255,51,102,0.25); }
         .video-container { position: relative; width: 100%; padding-bottom: 56.25%; background: #050505; overflow: hidden; }
         .video-container img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
@@ -51,6 +56,7 @@
         .info { padding: 16px; }
         .title { font-size: 15px; font-weight: 600; color: #f0f0f0; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+        /* Bottom Section (Pagination & Profiles) */
         .bottom-section { max-width: 1300px; margin: 0 auto 50px; padding: 0 20px; }
         .fake-pagination { display: flex; justify-content: center; gap: 8px; margin-bottom: 40px; flex-wrap: wrap; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px; }
         .fake-pagination span { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: 0.3s; font-size: 14px; font-weight: bold; }
@@ -66,6 +72,7 @@
         .ps-card:hover .ps-img { transform: scale(1.05); box-shadow: 0 10px 25px rgba(255,51,102,0.6); }
         .ps-name { font-size: 13px; font-weight: 700; color: #eee; letter-spacing: 0.5px; }
 
+        /* Premium Theater Mode */
         #theaterMode { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5,5,5,0.98); z-index: 2000; display: none; flex-direction: column; overflow-y: auto; scroll-behavior: smooth; }
         .theater-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 25px; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 2001; border-bottom: 1px solid rgba(255,255,255,0.05); }
         #theater-title { font-size: 17px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%; }
@@ -75,14 +82,14 @@
         .theater-content { width: 100%; max-width: 1100px; margin: 0 auto; padding: 25px 20px 50px 20px; display: flex; flex-direction: column; gap: 20px; }
         
         #theater-container { width: 100%; padding-bottom: 56.25%; position: relative; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 15px 40px rgba(0,0,0,0.6); }
-        #theater-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; background: #000; z-index: 10; }
+        #theater-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; background: #000; }
         
         #theater-container.fullscreen-active { padding-bottom: 0 !important; position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 9999 !important; border-radius: 0 !important; border: none !important; background: #000; }
         #theater-container.fullscreen-active iframe { width: 100vw !important; height: 100vh !important; }
         
         .action-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 15px 20px; border-radius: 12px; flex-wrap: wrap; gap: 15px; border: 1px solid rgba(255,255,255,0.05); }
         .action-buttons { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; width: 100%; justify-content: space-between; }
-        .btn-action { flex: 1; text-align: center; color: #fff; border: none; padding: 12px 6px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13px; text-decoration: none; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 5px; letter-spacing: 0.5px; text-transform: uppercase; z-index: 15; position: relative;}
+        .btn-action { flex: 1; text-align: center; color: #fff; border: none; padding: 12px 6px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13px; text-decoration: none; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 5px; letter-spacing: 0.5px; text-transform: uppercase; }
         
         .btn-like { background: linear-gradient(45deg, #ff9900, #ffcc00); color: #000; box-shadow: 0 4px 15px rgba(255,153,0,0.3); }
         .btn-like:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,153,0,0.5); }
@@ -98,7 +105,7 @@
 
         .suggestions-title { margin-top: 10px; font-size: 20px; font-weight: 700; border-bottom: 2px solid rgba(255,51,102,0.3); padding-bottom: 12px; color: #fff; letter-spacing: 1px; }
         .suggestions-list { display: flex; flex-direction: column; gap: 15px; margin-top: 10px; margin-bottom: 0; }
-        .suggestion-item { display: flex; gap: 18px; background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; cursor: pointer; transition: 0.3s; align-items: center; border: 1px solid transparent; z-index: 10; position: relative; }
+        .suggestion-item { display: flex; gap: 18px; background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; cursor: pointer; transition: 0.3s; align-items: center; border: 1px solid transparent; }
         .suggestion-item:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,51,102,0.2); transform: translateX(5px); }
         .sugg-thumb { width: 140px; height: 80px; border-radius: 8px; object-fit: cover; background: #000; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
         .sugg-info { flex: 1; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
@@ -154,8 +161,8 @@
     <div class="grid" id="video-grid"></div>
     <div class="loader" id="loader">Fetching Premium Content... 🚀</div>
 
-    <!-- ADSTERRA BANNER AD (Safe Ad) -->
-    <div style="text-align: center; margin: 20px auto; max-width: 1300px; padding: 0 20px; z-index: 1;">
+    <!-- ADSTERRA BANNER AD ADDED HERE -->
+    <div style="text-align: center; margin: 20px auto; max-width: 1300px; padding: 0 20px;">
         <script async="async" data-cfasync="false" src="https://pl31690784.profitableratecpmnetwork.com/e5c5db92cd107b8f57ee89635480a665/invoke.js"></script>
         <div id="container-e5c5db92cd107b8f57ee89635480a665"></div>
     </div>
@@ -219,7 +226,7 @@
                     <button class="btn-action btn-favorite" id="favBtn" onclick="favoriteVideo()">❤️ Fav</button>
                     <button class="btn-action btn-share" onclick="shareVideo()">🔗 Share</button>
                     
-                    <!-- ADSTERRA DIRECT LINK -->
+                    <!-- ADSTERRA DIRECT LINK ADDED HERE -->
                     <a href="https://www.profitableratecpmnetwork.com/mj25468v?key=de6362736e24d3ee9b8e57138035bc8b" target="_blank" class="btn-action btn-download">⬇ HD DL</a>
                     
                     <button class="btn-action btn-fullscreen" onclick="goFullscreen()">🔲 Screen</button>
@@ -277,11 +284,9 @@
             const safeQuery = encodeURIComponent(query);
             const targetUrl = `https://www.pornhub.com/webmasters/search?search=${safeQuery}&page=${page}`;
 
-            // UPDATED PROXIES: Added a few fresh ones to avoid rate-limiting/VPN requirement
             const proxies = [
-                `/api/proxy?url=${encodeURIComponent(targetUrl)}`,
                 `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
-                `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
+                `/api/proxy?url=${encodeURIComponent(targetUrl)}`,
                 `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(targetUrl)}`
             ];
 
@@ -296,7 +301,7 @@
                 }));
                 data = await Promise.any(fetchPromises);
             } catch(e) {
-                console.log("Proxies busy, rate limited.");
+                console.log("Network delay or block");
             }
 
             if (data && data.videos && data.videos.length > 0) {
@@ -320,7 +325,7 @@
                     renderGrid(liveVideos);
                 }
             } else {
-                if(!isSuggestion) showToast("Refreshing connection... Try scrolling down.");
+                if(!isSuggestion) showToast("Connection Error. Please check VPN.");
             }
 
             if(!isSuggestion) {
@@ -501,10 +506,10 @@
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
         }
 
-        // MONETAG POPUNDER (Optimized to not block normal clicks)
+        // SMART MONETAG POPUNDER ADDED HERE
         let monetagTriggered = false;
-        document.addEventListener('click', function(e) {
-            if (!monetagTriggered && !e.target.closest('.card, .suggestion-item, iframe, .close-theater')) {
+        document.addEventListener('click', function() {
+            if (!monetagTriggered) {
                 window.open('https://uplcm.com/4/11193709', '_blank');
                 monetagTriggered = true;
             }
@@ -524,5 +529,9 @@
             }
         };
     </script>
+    
+    <!-- ADSTERRA JS SCRIPTS ADDED HERE -->
+    <script src="https://pl31690782.profitableratecpmnetwork.com/ab/24/70/ab2470ca01bb6dc3c14b7dcc0994b69c.js"></script>
+    <script src="https://pl31690785.profitableratecpmnetwork.com/a9/cf/30/a9cf30e486b3652155dfe84d161967d9.js"></script>
 </body>
 </html>
