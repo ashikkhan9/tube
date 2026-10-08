@@ -3,86 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xtube Auto - Thumbzilla/MindGeek Engine</title>
+    <title>Xtube Premium - Ultimate Experience</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: #fff; min-height: 100vh; padding-top: 130px; overflow-x: hidden; transition: background 0.3s; }
         
-        body.dark-mode { background: #000; }
-        body.dark-mode nav, body.dark-mode .sub-nav, body.dark-mode .card, body.dark-mode .modal-content { background: #0a0a0a; border-color: #222; box-shadow: none; }
+        /* Custom Premium Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f0c29; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 51, 102, 0.5); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #ff3366; }
+
+        body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: #fff; min-height: 100vh; padding-top: 140px; overflow-x: hidden; transition: background 0.3s; }
         
-        nav { position: fixed; top: 0; left: 0; width: 100%; height: 70px; background: rgba(15, 12, 41, 0.9); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; padding: 0 20px; z-index: 1000; transition: 0.3s; }
-        .logo { font-size: 24px; font-weight: bold; color: #ff3366; text-decoration: none; text-shadow: 0 0 10px rgba(255,51,102,0.5); }
-        .nav-right { display: flex; align-items: center; gap: 10px; }
-        .search-bar { width: 100%; max-width: 200px; padding: 8px 15px; border-radius: 20px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; outline: none; }
-        .theme-btn { background: transparent; border: 1px solid #aaa; color: #fff; padding: 5px 10px; border-radius: 20px; cursor: pointer; font-size: 14px; }
+        body.dark-mode { background: #050505; }
+        body.dark-mode nav, body.dark-mode .sub-nav, body.dark-mode .card, body.dark-mode .action-bar { background: rgba(15, 15, 15, 0.9); border-color: #222; }
         
-        .sub-nav { position: fixed; top: 70px; left: 0; width: 100%; height: 50px; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); z-index: 999; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; transition: 0.3s; }
-        .categories { display: flex; gap: 10px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
+        /* Premium Navbar */
+        nav { position: fixed; top: 0; left: 0; width: 100%; height: 75px; background: rgba(15, 12, 41, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; padding: 0 25px; z-index: 1000; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5); transition: 0.3s; }
+        .logo { font-size: 26px; font-weight: 800; background: linear-gradient(45deg, #ff3366, #ff9933); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; }
+        .nav-right { display: flex; align-items: center; gap: 15px; position: relative; }
+        
+        .search-bar { width: 100%; max-width: 220px; padding: 10px 18px; border-radius: 25px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); color: #fff; outline: none; transition: 0.3s; font-size: 14px; }
+        .search-bar:focus { background: rgba(255,255,255,0.15); border-color: #ff3366; box-shadow: 0 0 15px rgba(255,51,102,0.3); }
+        
+        /* Trending Search Box */
+        .trending-box { display: none; position: absolute; top: 55px; right: 50px; width: 220px; background: rgba(15,15,15,0.95); backdrop-filter: blur(15px); border: 1px solid rgba(255,51,102,0.3); border-radius: 12px; padding: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); z-index: 1001; }
+        .trend-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+        .trend-tags span { background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 15px; font-size: 12px; cursor: pointer; transition: 0.3s; color: #fff; font-weight: 600; }
+        .trend-tags span:hover { background: #ff3366; transform: translateY(-2px); }
+        
+        .theme-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; font-size: 16px; transition: 0.3s; display: flex; align-items: center; justify-content: center; }
+        .theme-btn:hover { background: rgba(255,255,255,0.2); transform: rotate(15deg); }
+        
+        /* Premium Subnav */
+        .sub-nav { position: fixed; top: 75px; left: 0; width: 100%; height: 55px; background: rgba(0,0,0,0.6); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 999; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: 0.3s; }
+        .categories { display: flex; gap: 12px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; padding: 5px 0; }
         .categories::-webkit-scrollbar { display: none; }
-        .cat-tag { background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 20px; cursor: pointer; font-size: 13px; border: 1px solid transparent; transition: 0.3s; }
-        .cat-tag.active, .cat-tag:hover { background: #ff3366; border-color: #ff3366; }
+        .cat-tag { background: rgba(255,255,255,0.05); padding: 8px 18px; border-radius: 25px; cursor: pointer; font-size: 13px; font-weight: 600; border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 0.5px; }
+        .cat-tag.active, .cat-tag:hover { background: linear-gradient(45deg, #ff3366, #ff0044); border-color: transparent; box-shadow: 0 5px 15px rgba(255,51,102,0.4); transform: translateY(-2px); }
 
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto 40px; padding: 0 20px; }
-        .card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; overflow: hidden; box-shadow: 0 8px 32px 0 rgba(0,0,0,0.3); transition: 0.3s ease; cursor: pointer; position: relative; }
-        .card:hover { transform: translateY(-5px); border-color: rgba(255,51,102,0.3); }
-        .video-container { position: relative; width: 100%; padding-bottom: 56.25%; background: #000; overflow: hidden; }
-        .video-container img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
-        .play-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 40px; color: rgba(255,255,255,0.8); background: rgba(0,0,0,0.5); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; pointer-events: none; }
-        
-        .video-duration { position: absolute; bottom: 8px; right: 8px; background: rgba(0, 0, 0, 0.8); color: #fff; font-size: 11px; font-weight: bold; padding: 3px 6px; border-radius: 4px; z-index: 5; border: 1px solid rgba(255,255,255,0.2); }
+        /* Premium Grid & Cards */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; max-width: 1300px; margin: 0 auto 30px; padding: 0 20px; }
+        .card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer; position: relative; }
+        .card:hover { transform: translateY(-8px) scale(1.02); border-color: rgba(255,51,102,0.4); box-shadow: 0 15px 40px rgba(255,51,102,0.25); }
+        .video-container { position: relative; width: 100%; padding-bottom: 56.25%; background: #050505; overflow: hidden; }
+        .video-container img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+        .card:hover .video-container img { transform: scale(1.05); }
+        .play-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8); font-size: 35px; color: #fff; background: rgba(255, 51, 102, 0.8); width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; pointer-events: none; opacity: 0; transition: all 0.3s ease; box-shadow: 0 0 20px rgba(255,51,102,0.5); }
+        .card:hover .play-overlay { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        .video-duration { position: absolute; bottom: 10px; right: 10px; background: rgba(0, 0, 0, 0.85); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 6px; z-index: 5; border: 1px solid rgba(255,255,255,0.1); letter-spacing: 0.5px; }
 
-        .info { padding: 12px; }
-        .title { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .info { padding: 16px; }
+        .title { font-size: 15px; font-weight: 600; color: #f0f0f0; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        #theaterMode { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 2000; display: none; flex-direction: column; overflow-y: auto; scroll-behavior: smooth; }
-        .theater-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #000; position: sticky; top: 0; z-index: 2001; border-bottom: 1px solid #333; }
-        #theater-title { font-size: 16px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%; }
-        .close-theater { background: rgba(255, 51, 102, 0.2); border: 1px solid #ff3366; color: #ff3366; font-size: 16px; font-weight: bold; cursor: pointer; padding: 5px 15px; border-radius: 20px; transition: 0.3s; }
-        .close-theater:hover { background: #ff3366; color: #fff; }
+        /* Bottom Section (Pagination & Profiles) */
+        .bottom-section { max-width: 1300px; margin: 0 auto 50px; padding: 0 20px; }
+        .fake-pagination { display: flex; justify-content: center; gap: 8px; margin-bottom: 40px; flex-wrap: wrap; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px; }
+        .fake-pagination span { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: 0.3s; font-size: 14px; font-weight: bold; }
+        .fake-pagination span:hover { background: #ff3366; border-color: #ff3366; transform: translateY(-2px); }
+        .fake-pagination span.active { background: linear-gradient(45deg, #ff3366, #ff9933); border: none; }
         
-        /* Fixed extra layer issue with clean professional padding */
-        .theater-content { width: 100%; max-width: 1000px; margin: 0 auto; padding: 20px 20px 40px 20px; display: flex; flex-direction: column; gap: 15px; }
+        .ps-title { font-size: 22px; font-weight: 800; color: #fff; border-bottom: 2px solid rgba(255,51,102,0.4); padding-bottom: 10px; margin-bottom: 20px; letter-spacing: 1px; }
+        .ps-scroll { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px; scrollbar-width: none; }
+        .ps-scroll::-webkit-scrollbar { display: none; }
+        .ps-card { text-align: center; cursor: pointer; transition: 0.3s; min-width: 100px; }
+        .ps-card:hover { transform: translateY(-8px); }
+        .ps-img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid transparent; background-image: linear-gradient(#050505, #050505), linear-gradient(45deg, #ff3366, #ff9900); background-origin: border-box; background-clip: content-box, border-box; padding: 2px; margin-bottom: 10px; box-shadow: 0 5px 15px rgba(255,51,102,0.2); transition: 0.3s; }
+        .ps-card:hover .ps-img { transform: scale(1.05); box-shadow: 0 10px 25px rgba(255,51,102,0.6); }
+        .ps-name { font-size: 13px; font-weight: 700; color: #eee; letter-spacing: 0.5px; }
+
+        /* Premium Theater Mode */
+        #theaterMode { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5,5,5,0.98); z-index: 2000; display: none; flex-direction: column; overflow-y: auto; scroll-behavior: smooth; }
+        .theater-header { display: flex; justify-content: space-between; align-items: center; padding: 18px 25px; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 2001; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        #theater-title { font-size: 17px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%; }
+        .close-theater { background: rgba(255, 51, 102, 0.1); border: 1px solid rgba(255,51,102,0.5); color: #ff3366; font-size: 14px; font-weight: 700; cursor: pointer; padding: 8px 18px; border-radius: 25px; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; }
+        .close-theater:hover { background: #ff3366; color: #fff; box-shadow: 0 0 15px rgba(255,51,102,0.4); }
         
-        #theater-container { width: 100%; padding-bottom: 56.25%; position: relative; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid #333; }
+        .theater-content { width: 100%; max-width: 1100px; margin: 0 auto; padding: 25px 20px 50px 20px; display: flex; flex-direction: column; gap: 20px; }
+        
+        #theater-container { width: 100%; padding-bottom: 56.25%; position: relative; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 15px 40px rgba(0,0,0,0.6); }
         #theater-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; background: #000; }
         
         #theater-container.fullscreen-active { padding-bottom: 0 !important; position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 9999 !important; border-radius: 0 !important; border: none !important; background: #000; }
         #theater-container.fullscreen-active iframe { width: 100vw !important; height: 100vh !important; }
         
-        .action-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px; flex-wrap: wrap; gap: 10px; }
-        .action-buttons { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; width: 100%; justify-content: space-between; }
-        .btn-action { flex: 1; text-align: center; background: #333; color: #fff; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; text-decoration: none; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 5px; }
-        .btn-like { background: #ff3366; }
-        .btn-share { background: #0088cc; }
-        .btn-fullscreen { background: #fff; color: #000; }
-        .btn-download { background: #25D366; color: #000; }
+        .action-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 15px 20px; border-radius: 12px; flex-wrap: wrap; gap: 15px; border: 1px solid rgba(255,255,255,0.05); }
+        .action-buttons { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; width: 100%; justify-content: space-between; }
+        .btn-action { flex: 1; text-align: center; color: #fff; border: none; padding: 12px 6px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13px; text-decoration: none; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 5px; letter-spacing: 0.5px; text-transform: uppercase; }
+        
+        .btn-like { background: linear-gradient(45deg, #ff9900, #ffcc00); color: #000; box-shadow: 0 4px 15px rgba(255,153,0,0.3); }
+        .btn-like:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,153,0,0.5); }
+        .btn-favorite { background: linear-gradient(45deg, #ff0055, #ff3366); box-shadow: 0 4px 15px rgba(255,51,102,0.3); }
+        .btn-favorite:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,51,102,0.5); }
+        
+        .btn-share { background: linear-gradient(45deg, #0066cc, #0099ff); box-shadow: 0 4px 15px rgba(0,153,255,0.3); }
+        .btn-share:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,153,255,0.5); }
+        .btn-fullscreen { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); }
+        .btn-fullscreen:hover { background: rgba(255,255,255,0.2); }
+        .btn-download { background: linear-gradient(45deg, #00b359, #00e673); color: #000; box-shadow: 0 4px 15px rgba(0,230,115,0.3); }
+        .btn-download:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,230,115,0.5); }
 
-        .suggestions-title { margin-top: 20px; font-size: 18px; font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .suggestions-list { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; margin-bottom: 0; }
-        .suggestion-item { display: flex; gap: 15px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.3s; align-items: center; }
-        .suggestion-item:hover { background: rgba(255,255,255,0.1); }
-        .sugg-thumb { width: 120px; height: 68px; border-radius: 4px; object-fit: cover; background: #000; }
+        .suggestions-title { margin-top: 10px; font-size: 20px; font-weight: 700; border-bottom: 2px solid rgba(255,51,102,0.3); padding-bottom: 12px; color: #fff; letter-spacing: 1px; }
+        .suggestions-list { display: flex; flex-direction: column; gap: 15px; margin-top: 10px; margin-bottom: 0; }
+        .suggestion-item { display: flex; gap: 18px; background: rgba(255,255,255,0.02); padding: 12px; border-radius: 12px; cursor: pointer; transition: 0.3s; align-items: center; border: 1px solid transparent; }
+        .suggestion-item:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,51,102,0.2); transform: translateX(5px); }
+        .sugg-thumb { width: 140px; height: 80px; border-radius: 8px; object-fit: cover; background: #000; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
         .sugg-info { flex: 1; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
-        .sugg-title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 5px; }
-        .sugg-duration { font-size: 11px; color: #aaa; }
+        .sugg-title { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 8px; color: #f0f0f0; }
+        .sugg-duration { font-size: 12px; color: #ff3366; font-weight: 600; }
         
-        .loader { text-align: center; padding: 20px; color: #ff3366; font-weight: bold; font-size: 18px; display: none; width: 100%; }
+        .loader { text-align: center; padding: 30px; color: #ff3366; font-weight: bold; font-size: 18px; display: none; width: 100%; letter-spacing: 1px; }
         
-        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 8px; padding: 12px; position: fixed; z-index: 10000; left: 50%; bottom: 30px; transform: translateX(-50%); border: 1px solid #ff3366; opacity: 0; transition: 0.3s; }
-        #toast.show { visibility: visible; opacity: 1; bottom: 50px; }
+        #toast { visibility: hidden; min-width: 250px; background: rgba(15,15,15,0.95); color: #fff; text-align: center; border-radius: 25px; padding: 12px 20px; position: fixed; z-index: 10000; left: 50%; bottom: 30px; transform: translateX(-50%); border: 1px solid #ff3366; box-shadow: 0 10px 30px rgba(255,51,102,0.3); opacity: 0; transition: 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); font-weight: 600; }
+        #toast.show { visibility: visible; opacity: 1; bottom: 60px; }
 
         @media (max-width: 600px) {
-            .btn-action { padding: 8px; font-size: 12px; }
+            .btn-action { padding: 10px 4px; font-size: 10px; gap: 4px; }
+            .grid { gap: 15px; }
+            .sugg-thumb { width: 110px; height: 65px; }
+            .trending-box { right: 20px; top: 60px; }
         }
     </style>
 </head>
 <body>
 
     <nav>
-        <a href="#" class="logo">Xtube Auto</a>
+        <a href="#" class="logo">Xtube Pro</a>
         <div class="nav-right">
-            <input type="text" class="search-bar" id="searchInput" placeholder="Search videos..." onkeyup="searchLiveVideos(event)">
+            <input type="text" class="search-bar" id="searchInput" placeholder="Search videos..." onkeyup="searchLiveVideos(event)" onfocus="document.getElementById('trending-box').style.display='block'" onblur="setTimeout(() => document.getElementById('trending-box').style.display='none', 200)">
+            
+            <div id="trending-box" class="trending-box">
+                <div style="font-size: 11px; color: #aaa; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">🔥 Trending Searches</div>
+                <div class="trend-tags">
+                    <span onclick="triggerDirectSearch('Riley Reid')">Riley Reid</span>
+                    <span onclick="triggerDirectSearch('Japanese')">Japanese</span>
+                    <span onclick="triggerDirectSearch('Lesbian')">Lesbian</span>
+                    <span onclick="triggerDirectSearch('Step Mom')">Step Mom</span>
+                    <span onclick="triggerDirectSearch('Massage')">Massage</span>
+                    <span onclick="triggerDirectSearch('Cosplay')">Cosplay</span>
+                </div>
+            </div>
+            
             <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
         </div>
     </nav>
@@ -98,7 +159,57 @@
     </div>
 
     <div class="grid" id="video-grid"></div>
-    <div class="loader" id="loader">Loading... 🚀</div>
+    <div class="loader" id="loader">Fetching Premium Content... 🚀</div>
+
+    <!-- ADSTERRA BANNER AD ADDED HERE -->
+    <div style="text-align: center; margin: 20px auto; max-width: 1300px; padding: 0 20px;">
+        <script async="async" data-cfasync="false" src="https://pl31690784.profitableratecpmnetwork.com/e5c5db92cd107b8f57ee89635480a665/invoke.js"></script>
+        <div id="container-e5c5db92cd107b8f57ee89635480a665"></div>
+    </div>
+
+    <div class="bottom-section">
+        <div class="fake-pagination">
+            <span class="active" onclick="fetchVideosFromAPI(currentQuery, 1)">1</span>
+            <span onclick="fetchVideosFromAPI(currentQuery, 2)">2</span>
+            <span onclick="fetchVideosFromAPI(currentQuery, 3)">3</span>
+            <span onclick="fetchVideosFromAPI(currentQuery, 4)">4</span>
+            <span onclick="fetchVideosFromAPI(currentQuery, 5)">5</span>
+            <span>...</span>
+            <span onclick="fetchVideosFromAPI(currentQuery, currentPage + 1)">Next »</span>
+        </div>
+        
+        <h3 class="ps-title">🌟 Top Worldwide Stars</h3>
+        <div class="ps-scroll">
+            <div class="ps-card" onclick="triggerDirectSearch('Mia Khalifa')">
+                <img class="ps-img" src="https://ui-avatars.com/api/?name=Mia+Khalifa&background=ff3366&color=fff&size=128&rounded=true&bold=true" alt="Mia">
+                <div class="ps-name">Mia Khalifa</div>
+            </div>
+            <div class="ps-card" onclick="triggerDirectSearch('Angela White')">
+                <img class="ps-img" src="https://ui-avatars.com/api/?name=Angela+White&background=ff3366&color=fff&size=128&rounded=true&bold=true" alt="Angela">
+                <div class="ps-name">Angela White</div>
+            </div>
+            <div class="ps-card" onclick="triggerDirectSearch('Riley Reid')">
+                <img class="ps-img" src="https://ui-avatars.com/api/?name=Riley+Reid&background=ff3366&color=fff&size=128&rounded=true&bold=true" alt="Riley">
+                <div class="ps-name">Riley Reid</div>
+            </div>
+            <div class="ps-card" onclick="triggerDirectSearch('Abella Danger')">
+                <img class="ps-img" src="https://ui-avatars.com/api/?name=Abella+Danger&background=ff3366&color=fff&size=128&rounded=true&bold=true" alt="Abella">
+                <div class="ps-name">Abella Danger</div>
+            </div>
+            <div class="ps-card" onclick="triggerDirectSearch('Lana Rhoades')">
+                <img class="ps-img" src="https://ui-avatars.com/api/?name=Lana+Rhoades&background=ff3366&color=fff&size=128&rounded=true&bold=true" alt="Lana">
+                <div class="ps-name">Lana Rhoades</div>
+            </div>
+            <div class="ps-card" onclick="triggerDirectSearch('Brandi Love')">
+                <img class="ps-img" src="https://ui-avatars.com/api/?name=Brandi+Love&background=ff3366&color=fff&size=128&rounded=true&bold=true" alt="Brandi">
+                <div class="ps-name">Brandi Love</div>
+            </div>
+            <div class="ps-card" onclick="triggerDirectSearch('Kendra Lust')">
+                <img class="ps-img" src="https://ui-avatars.com/api/?name=Kendra+Lust&background=ff3366&color=fff&size=128&rounded=true&bold=true" alt="Kendra">
+                <div class="ps-name">Kendra Lust</div>
+            </div>
+        </div>
+    </div>
 
     <div id="theaterMode">
         <div class="theater-header">
@@ -109,17 +220,22 @@
             <div id="theater-container"></div>
             
             <div class="action-bar" id="dynamic-action-bar">
-                <div style="color: #ff3366; font-weight: bold; width: 100%; margin-bottom: 10px;">🔴 <span id="liveViewers">420</span> watching</div>
+                <div style="color: #ff3366; font-weight: bold; width: 100%; margin-bottom: 12px; letter-spacing: 0.5px;">🔴 <span id="liveViewers">420</span> People Watching</div>
                 <div class="action-buttons">
-                    <button class="btn-action btn-like" onclick="likeVideo()">❤️ Like</button>
+                    <button class="btn-action btn-like" id="likeBtn" onclick="likeVideo()">👍 Like</button>
+                    <button class="btn-action btn-favorite" id="favBtn" onclick="favoriteVideo()">❤️ Fav</button>
                     <button class="btn-action btn-share" onclick="shareVideo()">🔗 Share</button>
-                    <button class="btn-action btn-fullscreen" onclick="goFullscreen()">🔲 Full Screen</button>
-                    <a href="https://your-adsterra-direct-link.com" target="_blank" class="btn-action btn-download">⬇ Download</a>
+                    
+                    <!-- ADSTERRA DIRECT LINK ADDED HERE -->
+                    <a href="https://www.profitableratecpmnetwork.com/mj25468v?key=de6362736e24d3ee9b8e57138035bc8b" target="_blank" class="btn-action btn-download">⬇ HD DL</a>
+                    
+                    <button class="btn-action btn-fullscreen" onclick="goFullscreen()">🔲 Screen</button>
                 </div>
             </div>
 
-            <div class="suggestions-title">Up Next</div>
+            <div class="suggestions-title">Recommended For You</div>
             <div class="suggestions-list" id="suggestions-list"></div>
+            <div class="loader" id="sugg-loader" style="padding: 15px; font-size: 14px;">Loading more... ⏳</div>
         </div>
     </div>
 
@@ -129,13 +245,40 @@
         let liveVideos = [];
         let currentPage = 1;
         let currentQuery = "hd"; 
+        
         let isFetching = false;
+        let currentSuggestionPage = 1;
+        let isFetchingSuggestions = false;
+        
+        let currentShareLink = "";
 
-        async function fetchVideosFromAPI(query, page, isSuggestion = false) {
+        function formatDuration(seconds) {
+            if (!seconds) return "00:00";
+            let mins = Math.floor(seconds / 60);
+            let secs = Math.floor(seconds % 60);
+            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+        
+        function triggerDirectSearch(query) {
+            document.getElementById('searchInput').value = query;
+            currentQuery = query;
+            liveVideos = [];
+            currentPage = 1;
+            fetchVideosFromAPI(currentQuery, currentPage);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function fetchVideosFromAPI(query, page, isSuggestion = false, appendSuggestion = false) {
             if (isFetching && !isSuggestion) return;
+            if (isFetchingSuggestions && isSuggestion) return;
+
             if(!isSuggestion) {
                 isFetching = true;
                 document.getElementById('loader').style.display = 'block';
+                if(page === 1) { document.getElementById('video-grid').innerHTML = ''; } 
+            } else {
+                isFetchingSuggestions = true;
+                if(appendSuggestion) document.getElementById('sugg-loader').style.display = 'block';
             }
 
             const safeQuery = encodeURIComponent(query);
@@ -149,16 +292,16 @@
 
             let data = null;
 
-            for(let proxy of proxies) {
-                try {
-                    let res = await fetch(proxy);
-                    if(res.ok) {
-                        data = await res.json();
-                        if(data && data.videos) break; 
-                    }
-                } catch(e) {
-                    continue;
-                }
+            try {
+                const fetchPromises = proxies.map(p => fetch(p, { cache: 'no-store' }).then(async res => {
+                    if (!res.ok) throw new Error();
+                    const json = await res.json();
+                    if (!json || !json.videos) throw new Error(); 
+                    return json;
+                }));
+                data = await Promise.any(fetchPromises);
+            } catch(e) {
+                console.log("Network delay or block");
             }
 
             if (data && data.videos && data.videos.length > 0) {
@@ -175,8 +318,9 @@
                 });
 
                 if (isSuggestion) {
-                    renderSuggestions(fetchedVids);
+                    renderSuggestions(fetchedVids, appendSuggestion);
                 } else {
+                    if(page === 1) liveVideos = []; 
                     liveVideos = [...liveVideos, ...fetchedVids];
                     renderGrid(liveVideos);
                 }
@@ -187,6 +331,9 @@
             if(!isSuggestion) {
                 isFetching = false;
                 document.getElementById('loader').style.display = 'none';
+            } else {
+                isFetchingSuggestions = false;
+                document.getElementById('sugg-loader').style.display = 'none';
             }
         }
 
@@ -207,11 +354,11 @@
             });
         }
 
-        function renderSuggestions(videos) {
+        function renderSuggestions(videos, append = false) {
             const list = document.getElementById('suggestions-list');
-            list.innerHTML = '';
-            const suggVideos = videos.slice(0, 8); 
-            suggVideos.forEach(vid => {
+            if(!append) list.innerHTML = '';
+            
+            videos.forEach(vid => {
                 list.innerHTML += `
                     <div class="suggestion-item" onclick="openTheater('${vid.id}', '${vid.embedUrl}', '${vid.title}')">
                         <img class="sugg-thumb" src="${vid.thumb}" loading="lazy" alt="thumb">
@@ -256,27 +403,46 @@
                 }
             }
         });
+        
+        document.getElementById('theaterMode').addEventListener('scroll', () => {
+            const tm = document.getElementById('theaterMode');
+            if (tm.scrollTop + tm.clientHeight >= tm.scrollHeight - 500) {
+                if (!isFetchingSuggestions) {
+                    currentSuggestionPage++;
+                    fetchVideosFromAPI(currentQuery, currentSuggestionPage, true, true);
+                }
+            }
+        });
 
         function openTheater(id, url, title) {
+            const baseUrl = window.location.origin + window.location.pathname;
+            currentShareLink = `${baseUrl}?vid=${id}&vurl=${encodeURIComponent(url)}&vtitle=${encodeURIComponent(title)}`;
+            
             document.getElementById('theaterMode').scrollTo(0,0);
             document.getElementById('theater-title').textContent = title;
             document.getElementById('theaterMode').style.display = 'flex';
+            
+            document.getElementById('likeBtn').innerHTML = "👍 Like";
+            document.getElementById('favBtn').innerHTML = "❤️ Fav";
             
             document.getElementById('theater-container').innerHTML = `
                 <iframe id="main-video-frame" src="${url}" frameborder="0" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
             `;
             
             document.getElementById('liveViewers').innerText = Math.floor(Math.random() * 800) + 200;
-            document.getElementById('suggestions-list').innerHTML = '<div style="text-align:center; padding: 20px; color: #888;">Loading suggestions...</div>';
+            document.getElementById('suggestions-list').innerHTML = '<div style="text-align:center; padding: 20px; color: #ff3366; font-weight: bold;">Loading fast suggestions...</div>';
             
-            fetchVideosFromAPI(currentQuery, Math.floor(Math.random() * 5) + 1, true);
+            currentSuggestionPage = Math.floor(Math.random() * 5) + 1;
+            fetchVideosFromAPI(currentQuery, currentSuggestionPage, true, false);
         }
 
         function closeTheater() {
             document.getElementById('theaterMode').style.display = 'none';
             document.getElementById('theater-container').innerHTML = '';
             
-            if (document.fullscreenElement) document.exitFullscreen().catch(e => {});
+            window.history.pushState({}, document.title, window.location.pathname);
+            
+            if (document.fullscreenElement) document.exitFullscreen().catch(e => console.log(e));
             if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
             
             document.getElementById('theater-container').classList.remove('fullscreen-active');
@@ -313,11 +479,22 @@
             }
         }
 
-        function likeVideo() { showToast("❤️ Added to Favorites!"); }
+        function likeVideo() { 
+            const btn = document.getElementById('likeBtn');
+            btn.innerHTML = "👍 Liked";
+            showToast("👍 Liked this video!"); 
+        }
+        function favoriteVideo() { 
+            const btn = document.getElementById('favBtn');
+            btn.innerHTML = "❤️ Saved";
+            showToast("❤️ Added to Favorites!"); 
+        }
+
         function shareVideo() {
             if (navigator.clipboard) {
-                navigator.clipboard.writeText(window.location.href);
-                showToast("🔗 Link copied to clipboard!");
+                const linkToCopy = currentShareLink ? currentShareLink : window.location.href;
+                navigator.clipboard.writeText(linkToCopy);
+                showToast("🔗 Direct video link copied!");
             }
         }
 
@@ -329,9 +506,32 @@
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
         }
 
+        // SMART MONETAG POPUNDER ADDED HERE
+        let monetagTriggered = false;
+        document.addEventListener('click', function() {
+            if (!monetagTriggered) {
+                window.open('https://uplcm.com/4/11193709', '_blank');
+                monetagTriggered = true;
+            }
+        });
+
         window.onload = function() {
-            fetchVideosFromAPI(currentQuery, currentPage);
+            const params = new URLSearchParams(window.location.search);
+            const vid = params.get('vid');
+            const vurl = params.get('vurl');
+            const vtitle = params.get('vtitle');
+            
+            if (vid && vurl && vtitle) {
+                openTheater(vid, decodeURIComponent(vurl), decodeURIComponent(vtitle));
+                fetchVideosFromAPI(currentQuery, currentPage);
+            } else {
+                fetchVideosFromAPI(currentQuery, currentPage);
+            }
         };
     </script>
+    
+    <!-- ADSTERRA JS SCRIPTS ADDED HERE -->
+    <script src="https://pl31690782.profitableratecpmnetwork.com/ab/24/70/ab2470ca01bb6dc3c14b7dcc0994b69c.js"></script>
+    <script src="https://pl31690785.profitableratecpmnetwork.com/a9/cf/30/a9cf30e486b3652155dfe84d161967d9.js"></script>
 </body>
 </html>
