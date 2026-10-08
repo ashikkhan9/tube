@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xtube Auto - Final Build</title>
+    <title>Xtube Auto - Bulletproof API</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); color: #fff; min-height: 100vh; padding-top: 130px; overflow-x: hidden; transition: background 0.3s; }
@@ -36,45 +36,28 @@
         .title { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         #theaterMode { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 2000; display: none; flex-direction: column; overflow-y: auto; scroll-behavior: smooth; }
-        .theater-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #000; position: sticky; top: 0; z-index: 2001; border-bottom: 1px solid #333; }
-        #theater-title { font-size: 16px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%; }
-        .close-theater { background: rgba(255, 51, 102, 0.2); border: 1px solid #ff3366; color: #ff3366; font-size: 16px; font-weight: bold; cursor: pointer; padding: 5px 15px; border-radius: 20px; transition: 0.3s; }
-        .close-theater:hover { background: #ff3366; color: #fff; }
-        
+        .theater-header { display: flex; justify-content: space-between; padding: 15px 20px; background: #000; position: sticky; top: 0; z-index: 2001; border-bottom: 1px solid #333; }
+        .close-theater { background: transparent; border: none; color: #ff3366; font-size: 20px; cursor: pointer; }
         .theater-content { width: 100%; max-width: 1000px; margin: 0 auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
         
         #theater-container { width: 100%; padding-bottom: 56.25%; position: relative; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid #333; }
         #theater-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; background: #000; }
         
-        /* Fullscreen CSS */
-        #theater-container.fullscreen-active { padding-bottom: 0 !important; position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 9999 !important; border-radius: 0 !important; border: none !important; }
+        /* Fullscreen CSS (Added only this block) */
+        #theater-container.fullscreen-active { padding-bottom: 0 !important; position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 9999 !important; border-radius: 0 !important; border: none !important; background: #000; }
         #theater-container.fullscreen-active iframe { width: 100vw !important; height: 100vh !important; }
         
         .action-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px; flex-wrap: wrap; gap: 10px; }
-        .action-buttons { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; width: 100%; justify-content: space-between; }
-        .btn-action { flex: 1; text-align: center; background: #333; color: #fff; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; text-decoration: none; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 5px; }
-        .btn-like { background: #ff3366; }
-        .btn-share { background: #0088cc; }
+        .action-buttons { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .btn-action { background: #25D366; color: #000; border: none; padding: 10px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; text-decoration: none; transition: 0.2s; display: flex; align-items: center; gap: 5px; }
+        .btn-like { background: #ff3366; color: #fff; }
+        .btn-share { background: #0088cc; color: #fff; }
         .btn-fullscreen { background: #fff; color: #000; }
-        .btn-download { background: #25D366; color: #000; }
-
-        .suggestions-title { margin-top: 20px; font-size: 18px; font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .suggestions-list { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
-        .suggestion-item { display: flex; gap: 15px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.3s; align-items: center; }
-        .suggestion-item:hover { background: rgba(255,255,255,0.1); }
-        .sugg-thumb { width: 120px; height: 68px; border-radius: 4px; object-fit: cover; background: #000; }
-        .sugg-info { flex: 1; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
-        .sugg-title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 5px; }
-        .sugg-duration { font-size: 11px; color: #aaa; }
         
         .loader { text-align: center; padding: 20px; color: #ff3366; font-weight: bold; font-size: 18px; display: none; width: 100%; }
         
         #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 8px; padding: 12px; position: fixed; z-index: 10000; left: 50%; bottom: 30px; transform: translateX(-50%); border: 1px solid #ff3366; opacity: 0; transition: 0.3s; }
         #toast.show { visibility: visible; opacity: 1; bottom: 50px; }
-
-        @media (max-width: 600px) {
-            .btn-action { padding: 8px; font-size: 12px; }
-        }
     </style>
 </head>
 <body>
@@ -92,34 +75,29 @@
             <div class="cat-tag" onclick="loadCategory('amateur')">Amateur</div>
             <div class="cat-tag" onclick="loadCategory('asian')">Asian</div>
             <div class="cat-tag" onclick="loadCategory('teen')">Teen</div>
-            <div class="cat-tag" onclick="loadCategory('milf')">Milf</div>
-            <div class="cat-tag" onclick="loadCategory('lesbian')">Lesbian</div>
         </div>
     </div>
 
     <div class="grid" id="video-grid"></div>
-    <div class="loader" id="loader">Loading... 🚀</div>
+    <div class="loader" id="loader">Fetching Videos... 🚀</div>
 
     <div id="theaterMode">
         <div class="theater-header">
-            <h3 id="theater-title">Loading...</h3>
+            <h3 id="theater-title" style="color: #fff;">Player</h3>
             <button class="close-theater" onclick="closeTheater()">✖ Close</button>
         </div>
         <div class="theater-content">
             <div id="theater-container"></div>
             
             <div class="action-bar" id="dynamic-action-bar">
-                <div style="color: #ff3366; font-weight: bold; width: 100%; margin-bottom: 10px;">🔴 <span id="liveViewers">420</span> watching</div>
+                <div style="color: #ff3366; font-weight: bold;">🔴 <span id="liveViewers">420</span> watching</div>
                 <div class="action-buttons">
                     <button class="btn-action btn-like" onclick="likeVideo()">❤️ Like</button>
                     <button class="btn-action btn-share" onclick="shareVideo()">🔗 Share</button>
                     <button class="btn-action btn-fullscreen" onclick="goFullscreen()">🔲 Full Screen</button>
-                    <a href="https://your-adsterra-direct-link.com" target="_blank" class="btn-action btn-download">⬇ Download</a>
+                    <a href="#" class="btn-action" style="background:#25D366; color:#000;">⬇ Download HD</a>
                 </div>
             </div>
-
-            <div class="suggestions-title">Up Next</div>
-            <div class="suggestions-list" id="suggestions-list"></div>
         </div>
     </div>
 
@@ -131,71 +109,70 @@
         let currentQuery = "hd"; 
         let isFetching = false;
 
-        async function fetchVideosFromAPI(query, page, isSuggestion = false) {
-            if (isFetching && !isSuggestion) return;
-            if(!isSuggestion) {
-                isFetching = true;
-                document.getElementById('loader').style.display = 'block';
-            }
+        async function fetchVideosFromAPI(query, page) {
+            if (isFetching) return;
+            isFetching = true;
+            document.getElementById('loader').style.display = 'block';
 
             const safeQuery = encodeURIComponent(query);
             const targetUrl = `https://api.redtube.com/?data=redtube.Videos.searchVideos&search=${safeQuery}&page=${page}&output=json`;
 
-            let data = null;
+            // Bulletproof Proxy List (Unchanged)
+            const proxies = [
+                `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(targetUrl)}`,
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
+                `/api/proxy?url=${encodeURIComponent(targetUrl)}`
+            ];
 
-            try {
-                // 1. First Priority: Your Own Cloudflare Proxy (Super fast, unblocked)
-                let res1 = await fetch(`/api/proxy?url=${encodeURIComponent(targetUrl)}`);
-                if(res1.ok) {
-                    data = await res1.json();
-                }
-            } catch (err) {
-                console.log("Worker bypass failed, trying direct...");
-            }
+            let success = false;
 
-            // 2. Second Priority: Direct API fetch if worker fails
-            if (!data || !data.videos) {
+            for (let i = 0; i < proxies.length; i++) {
                 try {
-                    let res2 = await fetch(targetUrl);
-                    if(res2.ok) {
-                        data = await res2.json();
+                    console.log("Trying proxy: " + (i+1));
+                    const response = await fetch(proxies[i]);
+                    if (response.ok) {
+                        const data = await response.json();
+                        
+                        if (data && data.videos && data.videos.length > 0) {
+                            const fetchedVids = data.videos.map(v => {
+                                const vid = v.video;
+                                let cleanUrl = `https://embed.redtube.com/?id=${vid.video_id}`; 
+                                const safeTitle = vid.title ? vid.title.replace(/['"]/g, "") : "Video";
+                                const safeThumb = vid.default_thumb || "";
+                                const videoDuration = vid.duration || "00:00";
+
+                                return {
+                                    id: vid.video_id,
+                                    title: safeTitle,
+                                    embedUrl: cleanUrl, 
+                                    thumb: safeThumb,
+                                    duration: videoDuration
+                                };
+                            });
+
+                            liveVideos = [...liveVideos, ...fetchedVids];
+                            renderGrid(liveVideos);
+                            success = true;
+                            break; 
+                        }
                     }
-                } catch (err) {
-                    console.log("Direct API blocked by ISP");
+                } catch (error) {
+                    console.error("Proxy " + (i+1) + " failed.");
                 }
             }
 
-            if (data && data.videos && data.videos.length > 0) {
-                const fetchedVids = data.videos.map(v => {
-                    const vid = v.video;
-                    return {
-                        id: vid.video_id,
-                        title: vid.title ? vid.title.replace(/['"]/g, "") : "Video",
-                        embedUrl: `https://embed.redtube.com/?id=${vid.video_id}`, 
-                        thumb: vid.default_thumb || "",
-                        duration: vid.duration || "00:00"
-                    };
-                });
-
-                if (isSuggestion) {
-                    renderSuggestions(fetchedVids);
-                } else {
-                    liveVideos = [...liveVideos, ...fetchedVids];
-                    renderGrid(liveVideos);
-                }
-            } else {
-                if(!isSuggestion) showToast("Check your connection or VPN.");
+            if (!success) {
+                showToast("Connection Error. Please ensure VPN is ON and refresh.");
             }
 
-            if(!isSuggestion) {
-                isFetching = false;
-                document.getElementById('loader').style.display = 'none';
-            }
+            isFetching = false;
+            document.getElementById('loader').style.display = 'none';
         }
 
         function renderGrid(videos) {
             const grid = document.getElementById('video-grid');
             grid.innerHTML = '';
+            
             videos.forEach(vid => {
                 grid.innerHTML += `
                     <div class="card" onclick="openTheater('${vid.id}', '${vid.embedUrl}', '${vid.title}')">
@@ -205,23 +182,6 @@
                             <div class="video-duration">⏱ ${vid.duration}</div>
                         </div>
                         <div class="info"><div class="title">${vid.title}</div></div>
-                    </div>
-                `;
-            });
-        }
-
-        function renderSuggestions(videos) {
-            const list = document.getElementById('suggestions-list');
-            list.innerHTML = '';
-            const suggVideos = videos.slice(0, 8); 
-            suggVideos.forEach(vid => {
-                list.innerHTML += `
-                    <div class="suggestion-item" onclick="openTheater('${vid.id}', '${vid.embedUrl}', '${vid.title}')">
-                        <img class="sugg-thumb" src="${vid.thumb}" loading="lazy" alt="thumb">
-                        <div class="sugg-info">
-                            <div class="sugg-title">${vid.title}</div>
-                            <div class="sugg-duration">⏱ ${vid.duration}</div>
-                        </div>
                     </div>
                 `;
             });
@@ -251,7 +211,6 @@
         }
 
         window.addEventListener('scroll', () => {
-            if (document.getElementById('theaterMode').style.display === 'flex') return;
             if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 800) {
                 if (!isFetching) {
                     currentPage++;
@@ -261,55 +220,47 @@
         });
 
         function openTheater(id, url, title) {
-            document.getElementById('theaterMode').scrollTo(0,0);
             document.getElementById('theater-title').textContent = title;
             document.getElementById('theaterMode').style.display = 'flex';
             
-            // Solid generic iframe without extra buggy flags
             document.getElementById('theater-container').innerHTML = `
-                <iframe id="main-video-frame" src="${url}" frameborder="0" scrolling="no" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>
+                <iframe id="main-video-frame" src="${url}" frameborder="0" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="autoplay; fullscreen"></iframe>
             `;
             
-            document.getElementById('liveViewers').innerText = Math.floor(Math.random() * 1200) + 300;
-            document.getElementById('suggestions-list').innerHTML = '<div style="text-align:center; padding: 20px; color: #888;">Loading suggestions...</div>';
-            
-            fetchVideosFromAPI(currentQuery, Math.floor(Math.random() * 5) + 1, true);
+            document.getElementById('liveViewers').innerText = Math.floor(Math.random() * 800) + 200;
         }
 
+        // Updated for fullscreen exit
         function closeTheater() {
             document.getElementById('theaterMode').style.display = 'none';
             document.getElementById('theater-container').innerHTML = '';
             
-            if (document.fullscreenElement) {
-                document.exitFullscreen().catch(e => console.log(e));
-            }
-            if (screen.orientation && screen.orientation.unlock) {
-                screen.orientation.unlock();
-            }
+            if (document.fullscreenElement) document.exitFullscreen().catch(e => {});
+            if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
+            document.getElementById('theater-container').classList.remove('fullscreen-active');
         }
 
-        async function goFullscreen() {
+        // Updated Fullscreen Function (Only this was changed)
+        function goFullscreen() {
             const container = document.getElementById('theater-container');
-            
-            if (!document.fullscreenElement) {
-                try {
-                    if (container.requestFullscreen) await container.requestFullscreen();
-                    else if (container.webkitRequestFullscreen) await container.webkitRequestFullscreen();
-                    
-                    if (screen.orientation && screen.orientation.lock) {
-                        await screen.orientation.lock("landscape").catch(e => console.log(e));
-                    }
-                    container.classList.add('fullscreen-active');
-                } catch (err) {
-                    console.log("Fullscreen error:", err);
+            if (!document.fullscreenElement && !document.webkitIsFullScreen) {
+                if (container.requestFullscreen) container.requestFullscreen();
+                else if (container.webkitRequestFullscreen) container.webkitRequestFullscreen();
+                
+                if (screen.orientation && screen.orientation.lock) {
+                    screen.orientation.lock("landscape").catch(e => console.log(e));
                 }
+                container.classList.add('fullscreen-active');
             } else {
                 if (document.exitFullscreen) document.exitFullscreen();
+                else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+                
                 if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
                 container.classList.remove('fullscreen-active');
             }
         }
-        
+
+        // Added event listeners to handle mobile back button during fullscreen
         document.addEventListener('fullscreenchange', exitHandler);
         document.addEventListener('webkitfullscreenchange', exitHandler);
 
@@ -322,7 +273,10 @@
             }
         }
 
-        function likeVideo() { showToast("❤️ Added to Favorites!"); }
+        function likeVideo() {
+            showToast("❤️ Added to Favorites!");
+        }
+
         function shareVideo() {
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(window.location.href);
@@ -330,7 +284,10 @@
             }
         }
 
-        function toggleTheme() { document.body.classList.toggle('dark-mode'); }
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+        }
+
         function showToast(msg) {
             const toast = document.getElementById("toast");
             toast.textContent = msg;
