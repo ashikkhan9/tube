@@ -34,11 +34,13 @@
         .cat-tag { background: rgba(255,255,255,0.05); padding: 8px 20px; border-radius: 25px; cursor: pointer; font-size: 13px; font-weight: 700; border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px; color: #aaa; }
         .cat-tag.active, .cat-tag:hover { background: #e50914; color: #fff; border-color: #e50914; box-shadow: 0 5px 15px rgba(229, 9, 20, 0.4); }
 
-        /* Premium Grid */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; max-width: 1400px; margin: 0 auto 30px; padding: 0 25px; position: relative; z-index: 50; }
+        /* Premium Grid - YouTube Style Ratio */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; max-width: 1400px; margin: 0 auto 30px; padding: 0 25px; position: relative; z-index: 50; }
         
         .card { background: #111; border-radius: 12px; overflow: hidden; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer; position: relative; z-index: 9999; border: 1px solid #222; }
         .card:hover { transform: scale(1.03); border-color: #e50914; box-shadow: 0 15px 30px rgba(229, 9, 20, 0.2); z-index: 10000; }
+        
+        /* 16:9 Aspect Ratio Container */
         .video-container { position: relative; width: 100%; padding-bottom: 56.25%; background: #050505; overflow: hidden; }
         .video-container img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; opacity: 0.9; }
         .card:hover .video-container img { transform: scale(1.08); opacity: 1; }
@@ -108,9 +110,9 @@
 
         .loader { text-align: center; padding: 40px; color: #e50914; font-weight: 900; font-size: 16px; display: none; width: 100%; letter-spacing: 2px; text-transform: uppercase; }
 
+        /* PERFECT YOUTUBE STYLE FOR MOBILE */
         @media (max-width: 600px) {
-            .grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; padding: 0 15px; }
-            .video-container { padding-bottom: 140%; } /* Vertical thumbnails for mobile */
+            .grid { grid-template-columns: 1fr; gap: 20px; padding: 0 10px; } /* 1 Video Per Row like YouTube */
             .btn-action { padding: 8px 12px; font-size: 11px; }
             .pulsing-play-btn { font-size: 16px; padding: 14px 30px; }
             .suggestions-list { grid-template-columns: 1fr; }
@@ -123,18 +125,7 @@
     <nav>
         <a href="#" class="logo">Xtube<span>Pro</span></a>
         <div class="nav-right">
-            <input type="text" class="search-bar" id="searchInput" placeholder="Search premium..." onkeyup="searchLiveVideos(event)" onfocus="document.getElementById('trending-box').style.display='block'" onblur="setTimeout(() => document.getElementById('trending-box').style.display='none', 200)">
-            
-            <div id="trending-box" class="trending-box">
-                <div style="font-size: 11px; color: #888; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">🔥 Trending Now</div>
-                <div class="trend-tags">
-                    <span onclick="triggerDirectSearch('Riley Reid')">Riley Reid</span>
-                    <span onclick="triggerDirectSearch('Japanese')">Japanese</span>
-                    <span onclick="triggerDirectSearch('Lesbian')">Lesbian</span>
-                    <span onclick="triggerDirectSearch('Massage')">Massage</span>
-                    <span onclick="triggerDirectSearch('Step Mom')">Step Mom</span>
-                </div>
-            </div>
+            <input type="text" class="search-bar" id="searchInput" placeholder="Search premium..." onkeyup="searchLiveVideos(event)">
         </div>
     </nav>
     <div class="sub-nav">
@@ -147,10 +138,11 @@
         </div>
     </div>
 
+    <!-- MAIN VIDEO GRID -->
     <div class="grid" id="video-grid"></div>
     <div class="loader" id="loader">Loading Premium Content...</div>
 
-    <!-- ADSTERRA BANNER AD -->
+    <!-- GLOBAL ADSTERRA BANNER -->
     <div style="text-align: center; margin: 20px auto; max-width: 1400px; padding: 0 25px; z-index: 100; position: relative;">
         <script async="async" data-cfasync="false" src="https://pl31690784.profitableratecpmnetwork.com/e5c5db92cd107b8f57ee89635480a665/invoke.js"></script>
         <div id="container-e5c5db92cd107b8f57ee89635480a665"></div>
@@ -159,47 +151,26 @@
     <div class="bottom-section">
         <h3 class="ps-title">Top Verified Stars</h3>
         <div class="ps-scroll">
-            <div class="ps-card" onclick="triggerDirectSearch('Mia Khalifa')">
-                <img class="ps-img" src="https://ui-avatars.com/api/?name=Mia+Khalifa&background=e50914&color=fff&size=128&rounded=true&bold=true">
-                <div class="ps-name">Mia Khalifa</div>
-            </div>
-            <div class="ps-card" onclick="triggerDirectSearch('Angela White')">
-                <img class="ps-img" src="https://ui-avatars.com/api/?name=Angela+White&background=e50914&color=fff&size=128&rounded=true&bold=true">
-                <div class="ps-name">Angela White</div>
-            </div>
-            <div class="ps-card" onclick="triggerDirectSearch('Riley Reid')">
-                <img class="ps-img" src="https://ui-avatars.com/api/?name=Riley+Reid&background=e50914&color=fff&size=128&rounded=true&bold=true">
-                <div class="ps-name">Riley Reid</div>
-            </div>
-            <div class="ps-card" onclick="triggerDirectSearch('Abella Danger')">
-                <img class="ps-img" src="https://ui-avatars.com/api/?name=Abella+Danger&background=e50914&color=fff&size=128&rounded=true&bold=true">
-                <div class="ps-name">Abella Danger</div>
-            </div>
-            <div class="ps-card" onclick="triggerDirectSearch('Lana Rhoades')">
-                <img class="ps-img" src="https://ui-avatars.com/api/?name=Lana+Rhoades&background=e50914&color=fff&size=128&rounded=true&bold=true">
-                <div class="ps-name">Lana Rhoades</div>
-            </div>
+            <div class="ps-card" onclick="triggerDirectSearch('Mia Khalifa')"><img class="ps-img" src="https://ui-avatars.com/api/?name=Mia+Khalifa&background=e50914&color=fff&size=128"><div class="ps-name">Mia Khalifa</div></div>
+            <div class="ps-card" onclick="triggerDirectSearch('Angela White')"><img class="ps-img" src="https://ui-avatars.com/api/?name=Angela+White&background=e50914&color=fff&size=128"><div class="ps-name">Angela White</div></div>
+            <div class="ps-card" onclick="triggerDirectSearch('Riley Reid')"><img class="ps-img" src="https://ui-avatars.com/api/?name=Riley+Reid&background=e50914&color=fff&size=128"><div class="ps-name">Riley Reid</div></div>
+            <div class="ps-card" onclick="triggerDirectSearch('Abella Danger')"><img class="ps-img" src="https://ui-avatars.com/api/?name=Abella+Danger&background=e50914&color=fff&size=128"><div class="ps-name">Abella Danger</div></div>
         </div>
     </div>
 
-    <!-- THE ULTIMATE CLICK-TRAP THEATER MODE -->
+    <!-- THEATER MODE (FAKE PLAYER) -->
     <div id="theaterMode">
         <div class="theater-header">
             <h3 id="theater-title">Loading...</h3>
             <button class="close-theater" onclick="closeTheater()">✖</button>
         </div>
         <div class="theater-content">
-            
-            <div id="theater-container">
-                <!-- FAKE PLAYER INJECTED HERE -->
-            </div>
+            <div id="theater-container"></div>
             
             <div class="action-bar">
                 <div class="stats"><span>🔴 Live:</span> <span id="liveViewers">1,420</span> Watching Now</div>
                 <div class="action-buttons">
-                    <!-- ADSTERRA DIRECT LINK ON ACTION BUTTONS -->
                     <button class="btn-action" onclick="window.open('https://www.profitableratecpmnetwork.com/mj25468v?key=de6362736e24d3ee9b8e57138035bc8b', '_blank')">👍 Like</button>
-                    <button class="btn-action" onclick="window.open('https://www.profitableratecpmnetwork.com/mj25468v?key=de6362736e24d3ee9b8e57138035bc8b', '_blank')">❤️ Save</button>
                     <a href="https://www.profitableratecpmnetwork.com/mj25468v?key=de6362736e24d3ee9b8e57138035bc8b" target="_blank" class="btn-action btn-download">⬇ Download 4K</a>
                 </div>
             </div>
@@ -234,7 +205,6 @@
 
             const safeQuery = encodeURIComponent(query);
             const targetUrl = `https://www.pornhub.com/webmasters/search?search=${safeQuery}&page=${page}`;
-
             const proxies = [
                 `/api/proxy?url=${encodeURIComponent(targetUrl)}`,
                 `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
@@ -245,9 +215,7 @@
             try {
                 const fetchPromises = proxies.map(p => fetch(p, { cache: 'no-store' }).then(async res => {
                     if (!res.ok) throw new Error();
-                    const json = await res.json();
-                    if (!json || !json.videos) throw new Error(); 
-                    return json;
+                    return await res.json();
                 }));
                 data = await Promise.any(fetchPromises);
             } catch(e) { console.log("Loading..."); }
@@ -279,7 +247,8 @@
         function renderGrid(videos) {
             const grid = document.getElementById('video-grid');
             grid.innerHTML = '';
-            videos.forEach(vid => {
+            
+            videos.forEach((vid, index) => {
                 grid.innerHTML += `
                     <div class="card" onclick="openTheater('${vid.id}', '${vid.thumb}', '${vid.title}')">
                         <div class="video-container">
@@ -293,6 +262,24 @@
                         </div>
                     </div>
                 `;
+                
+                // IN-FEED AD SYSTEM: Insert Sponsored Adsterra Card every 3 videos
+                if ((index + 1) % 3 === 0) {
+                    grid.innerHTML += `
+                        <div class="card" onclick="window.open('https://www.profitableratecpmnetwork.com/mj25468v?key=de6362736e24d3ee9b8e57138035bc8b', '_blank')" style="border: 2px solid #e50914; box-shadow: 0 0 15px rgba(229,9,20,0.3);">
+                            <div class="video-container" style="background: linear-gradient(45deg, #2a0000, #000); display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <div class="vip-badge" style="background: #ffcc00; color: #000;">SPONSORED</div>
+                                <div style="font-size: 35px; margin-bottom: 10px;">🔞</div>
+                                <h3 style="color: #ffcc00; font-size: 16px; margin-bottom: 5px; text-transform: uppercase;">Private Videos Unlocked</h3>
+                                <div style="background: #e50914; padding: 6px 15px; border-radius: 20px; font-size: 11px; font-weight: bold; margin-top: 5px;">CLICK TO WATCH</div>
+                            </div>
+                            <div class="info" style="background: #1a0000;">
+                                <div class="title" style="color: #ffcc00;">🔥 Join VIP Premium Channel</div>
+                                <div class="views">Ad • Sponsored Content</div>
+                            </div>
+                        </div>
+                    `;
+                }
             });
         }
 
@@ -330,13 +317,11 @@
             }
         });
 
-        // THE CLICK-TRAP LOGIC
         function openTheater(id, thumb, title) {
             document.getElementById('theaterMode').scrollTo(0,0);
             document.getElementById('theater-title').textContent = title;
             document.getElementById('theaterMode').style.display = 'flex';
             
-            // Injecting the Fake Player with Blurred Thumbnail
             document.getElementById('theater-container').innerHTML = `
                 <div class="fake-player-bg" style="background-image: url('${thumb}');" onclick="triggerAdAndLoad()">
                     <div class="fake-player-overlay"></div>
@@ -353,19 +338,14 @@
             fetchVideosFromAPI(currentQuery, Math.floor(Math.random() * 5) + 1, true);
         }
 
+        // PLAY BUTTON CLICK (2ND TIME CLICK - ALWAYS OPENS DIRECT LINK)
         function triggerAdAndLoad() {
-            // MAIN ADSTERRA DIRECT LINK TRIGGER ON PLAY BUTTON
             window.open('https://www.profitableratecpmnetwork.com/mj25468v?key=de6362736e24d3ee9b8e57138035bc8b', '_blank');
             
-            // Hide Play button and show fake buffering
             document.getElementById('fakePlayBtn').style.display = 'none';
             document.getElementById('fakeLoading').style.display = 'flex';
             
-            // Keep them waiting to increase time-on-page
-            setTimeout(() => {
-                document.getElementById('fakeLoading').innerHTML = `<div class="spinner"></div>Bypassing Geo-Block...`;
-            }, 3000);
-            
+            setTimeout(() => { document.getElementById('fakeLoading').innerHTML = `<div class="spinner"></div>Bypassing Geo-Block...`; }, 3000);
             setTimeout(() => {
                 document.getElementById('fakePlayBtn').style.display = 'flex';
                 document.getElementById('fakeLoading').style.display = 'none';
@@ -378,19 +358,19 @@
             document.getElementById('theater-container').innerHTML = '';
         }
 
-        // ADSTERRA DIRECT LINK ON GLOBAL CLICK (Once per reload)
-        let popunderTriggered = false;
+        // GLOBAL CLICK (1ST TIME ANYWHERE - OPENS DIRECT LINK ONCE)
+        let firstClickDone = false;
         document.addEventListener('click', function(e) {
-            if (!popunderTriggered && !e.target.closest('.close-theater')) {
+            if (!firstClickDone && !e.target.closest('.close-theater') && !e.target.closest('.fake-player-bg')) {
                 window.open('https://www.profitableratecpmnetwork.com/mj25468v?key=de6362736e24d3ee9b8e57138035bc8b', '_blank');
-                popunderTriggered = true;
+                firstClickDone = true; 
             }
         });
 
         window.onload = () => fetchVideosFromAPI(currentQuery, currentPage);
     </script>
 
-    <!-- ADSTERRA SOCIAL/POPUNDER SCRIPTS -->
+    <!-- ADSTERRA SOCIAL SCRIPTS -->
     <script src="https://pl31690782.profitableratecpmnetwork.com/ab/24/70/ab2470ca01bb6dc3c14b7dcc0994b69c.js"></script>
     <script src="https://pl31690785.profitableratecpmnetwork.com/a9/cf/30/a9cf30e486b3652155dfe84d161967d9.js"></script>
 
